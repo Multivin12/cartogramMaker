@@ -1,3 +1,4 @@
+//This file is for running the Gastner Newmann algorithm
 const OFFSET = 0.005;
 const DCT2 = require('./DCT2.js');
 const GastnerNewmann = require('./GastnerNewmann.js');

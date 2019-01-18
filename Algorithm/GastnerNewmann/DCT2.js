@@ -134,37 +134,5 @@ class DCT2{
         } 
         return _2DArray; 
     }
-
-    //Function to convert from a 2D array into a 1D array
-    //parameters are the 2dArray and the dimensions of the 2D array
-    static to1DArray(_2DArray,xsize,ysize) {
-        var data = DCT2.initializeArray(xsize*ysize);
-        for(var i=0;i<xsize;i++) {
-            for(var j=0;j<ysize;j++) {
-                data[i*ysize+j]=_2DArray[i][j];
-            }
-        }
-        return data;
-    }
-
-    //Function to convert from a 1D array into a 2D array
-    //The parameters are the 1D array and the dimensions of the desired 2D array.
-    static to2DArray(_1DArray,xsize,ysize) {
-        var data = DCT2.initialize2DArray(xsize,ysize);
-        for(var i=0;i<xsize;i++) {
-            for(var j=0;j<ysize;j++) {
-                data[i][j]= _1DArray[i*ysize+j];
-            }
-        }
-        return data;
-    }
-
-
-
-    //Function for transforming an array into a suitable form for ml-fft's ifft
-    //parameters are of type array, int and int
-    static transformArray(data,xsize,ysize) {
-
-    }
 }
 module.exports = DCT2;
