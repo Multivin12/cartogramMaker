@@ -1,3 +1,4 @@
+//This file is for performing the Gastner Newman algorithm on a given grid
 //Algorithm taken from Newmann's C code implementation 
 //can be found here: http://www-personal.umich.edu/~mejn/cart/.
 
@@ -6,18 +7,14 @@ const INITH = 0.001; //Initial size of a time step
 const TARGETERROR = 0.01; // Desired accuracy per step in pixels
 const MAXRATIO = 4.0; //Max ratio to increase step size by
 
-var lib = require('ml-fft');
-var FFT = lib.FFT;
-var FFTUtils = lib.FFTUtils;
-
 class GastnerNewmann {
 
     constructor() {
         //2D array representing the population density at time t (5 snaps/iterations needed)
         this.rhot = null;
-        //1D array representing the fft of the rhot initially (t = 0)
+        //2D array representing the fft of the rhot initially (t = 0)
         this.fftrho = null;
-        //1D array representing the density at time t
+        //2D array representing the density at time t
         this.fftexpt = null;
         //3D array representing the xvelocity at time t
         this.vxt = null;
@@ -35,9 +32,9 @@ class GastnerNewmann {
      */
     cart_makews(xsize,ysize) {
 
-        this.rhot = DCT2.initialize2DArray(5,xsize*ysize);
-        this.fftrho = DCT2.initializeArray(xsize*ysize);
-        this.fftexpt = DCT2.initializeArray(xsize*ysize);
+        this.rhot = DCT2.initialize3DArray(5,xsize,ysize);
+        this.fftrho = DCT2.initialize2DArray(xsize,ysize);
+        this.fftexpt = DCT2.initialize2DArray(xsize,ysize);
 
         this.vxt = DCT2.initialize3DArray(5,(xsize+1),(ysize+1));
         this.vyt = DCT2.initialize3DArray(5,(xsize+1),(ysize+1));
@@ -59,9 +56,8 @@ class GastnerNewmann {
     * inputs are of type 2d array,int and int.
     * Usage: cartogramData = cart_transform(cartogramData,xsize,ysize).
     */
-    cart_transform(userrho,xsize,ysize){
-        var temp = DCT2.performDCT2(userrho);
-        this.fftrho = DCT2.to1DArray(temp,xsize,ysize);
+    cart_transform(userrho){
+        this.fftrho = DCT2.performDCT2(userrho);
     }
 
     /**Function to do the transformation of a given set of points to the
@@ -74,6 +70,7 @@ class GastnerNewmann {
         this.spp = null;
         //calculate initial density and velocity for snapshot zero
         this.cart_density(0.0,0,xsize,ysize);
+
         this.cart_vgrid(0,xsize,ysize);
         s = 0;
         
@@ -117,25 +114,23 @@ class GastnerNewmann {
             ky = Math.PI*iy/ysize;
             this.expky[iy] = Math.exp(-ky*ky*t);
         }
-
+        
         for(ix=0; ix<xsize;ix++) {
             kx = Math.PI*ix/xsize;
             expkx = Math.exp(-kx*kx*t);
             
             for (iy=0; iy<ysize; iy++) {
-                this.fftexpt[ix*ysize+iy] = expkx*this.expky[iy]*this.fftrho[ix*ysize+iy];
+                this.fftexpt[ix][iy] = expkx*this.expky[iy]*this.fftrho[ix][iy];
             }
         }
-
+        
         //Perform iDCT
         /*make plans for the back transforms*/
         //Using the iDCT
-        var temp = DCT2.to2DArray(this.fftexpt,xsize,ysize);
         
-        temp = DCT2.performiDCT2(temp);
-        //put it back into a 1D array
-        var temp2 = DCT2.to1DArray(temp,xsize,ysize);
-        this.rhot[s] = temp2;
+        var temp = DCT2.performiDCT2(this.fftexpt);
+        this.rhot[s] = temp;
+        
     }
 
     /** Function to calulate the velocity at all integer grid points for a 
@@ -153,39 +148,39 @@ class GastnerNewmann {
 
         /* Do the top border */
 
-        r11 = this.rhot[s][0];
+        r11 = this.rhot[s][0][0];
         for (ix=1; ix<xsize;ix++) {
             r01 = r11;
-            r11 = this.rhot[s][ix*ysize];
+            r11 = this.rhot[s][ix][0];
             this.vxt[s][ix][0] = -2*(r11-r01)/(r11+r01);
             this.vyt[s][ix][0] = 0.0;
         }
 
         /* Do the bottom border */
 
-        r10 = this.rhot[s][ysize-1];
+        r10 = this.rhot[s][0][(ysize-1)];
         for(ix=1;ix<xsize;ix++) {
             r00 = r10;
-            r10 = this.rhot[s][ix*ysize+ysize-1];
+            r10 = this.rhot[s][ix][ysize-1];
             this.vxt[s][ix][ysize] = -2*(r10-r00)/(r10+r00);
             this.vyt[s][ix][ysize] = 0.0;
         }
 
         /* Do the left edge */
 
-        r11 = this.rhot[s][0];
+        r11 = this.rhot[s][0][0];
         for (iy=1;iy<ysize;iy++) {
             r10 = r11;
-            r11 = this.rhot[s][iy];
+            r11 = this.rhot[s][0][iy];
             this.vxt[s][0][iy] = 0.0;
             this.vyt[s][0][iy] = -2*(r11-r10)/(r11+r10);
         }
 
         /* Do the right edge */
-        r01 = this.rhot[s][(xsize-1)*ysize];
+        r01 = this.rhot[s][(xsize-1)][0];
         for(iy=1;iy<ysize;iy++) {
             r00 = r01;
-            r01 = this.rhot[s][(xsize-1)*ysize+iy];
+            r01 = this.rhot[s][(xsize-1)][iy];
             this.vxt[s][xsize][iy] = 0.0;
             this.vyt[s][xsize][iy] = -2*(r01-r00)/(r01+r00);
         }
@@ -193,13 +188,13 @@ class GastnerNewmann {
         /* Now do all the points in the middle */
 
         for(ix=1;ix<xsize;ix++) {
-            r01 = this.rhot[s][(ix-1)*ysize];
-            r11 = this.rhot[s][ix*ysize];
+            r01 = this.rhot[s][(ix-1)][0];
+            r11 = this.rhot[s][ix][0];
             for (iy=1;iy<ysize;iy++) {
                 r00 = r01;
                 r10 = r11;
-                r01 = this.rhot[s][(ix-1)*ysize+iy];
-                r11 = this.rhot[s][ix*ysize+iy];
+                r01 = this.rhot[s][(ix-1)][iy];
+                r11 = this.rhot[s][ix][iy];
                 mid = r10 + r00 + r11 + r01;
                 this.vxt[s][ix][iy] = -2*(r10-r00+r11-r01)/mid;
                 this.vyt[s][ix][iy] = -2*(r01-r00+r11-r10)/mid;
@@ -449,19 +444,19 @@ for (var i=0;i<xsize;i++) {
 }
 
 
-var test = new GastnerNewmann();
+//var test = new GastnerNewmann();
 //Do the various stages as stated in the documentation of cart.c
-test.cart_makews(xsize,ysize);
-test.cart_transform(inputTestData,xsize,ysize);
+//test.cart_makews(xsize,ysize);
+//test.cart_transform(inputTestData,xsize,ysize);
 //fftrho remember is where the output of the DCT of the input data is stored.
-var temp = creategrid(xsize,ysize);
-var gridx = temp[0];
-var gridy = temp[1];
-var tup = test.cart_makecart(gridx,gridy,(xsize+1)*(ysize+1),xsize,ysize,0);
+//var temp = creategrid(xsize,ysize);
+//var gridx = temp[0];
+//var gridy = temp[1];
+//var tup = test.cart_makecart(gridx,gridy,(xsize+1)*(ysize+1),xsize,ysize,0);
 
-gridx = tup[0];
-gridy = tup[1];
-for(var i =0;i<gridx.length;i++) {
-    console.log(gridx[i],gridy[i]);
-}
+//gridx = tup[0];
+//gridy = tup[1];
+//for(var i =0;i<gridx.length;i++) {
+    //console.log(gridx[i],gridy[i]);
+//}
 module.exports = GastnerNewmann;
