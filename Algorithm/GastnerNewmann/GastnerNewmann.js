@@ -6,9 +6,6 @@ const DCT2 = require('./DCT2.js');
 const INITH = 0.001; //Initial size of a time step
 const TARGETERROR = 0.01; // Desired accuracy per step in pixels
 const MAXRATIO = 4.0; //Max ratio to increase step size by
-const napa = require('napajs');
-const os = require('os');
-const NUMBER_OF_WORKERS = os.cpus().length;
 
 class GastnerNewmann {
 
@@ -131,9 +128,8 @@ class GastnerNewmann {
         //Perform iDCT
         /*make plans for the back transforms*/
         //Using the iDCT
-        console.time('test');
-        var temp = DCT2.performIDCT2(this.fftexpt,xsize,ysize);
-        console.timeEnd('test');
+
+        var temp = DCT2.performiDCT2(this.fftexpt);
         this.rhot[s] = temp;
         
     }
@@ -145,7 +141,6 @@ class GastnerNewmann {
         var ix,iy,r00,r10,r01,r11,mid = null;
 
         /* Do the corners */
-
         this.vxt[s][0][0] = this.vyt[s][0][0] = 0;
         this.vxt[s][xsize][0] = this.vyt[s][xsize][0] = 0;
         this.vxt[s][0][ysize] = this.vyt[s][0][ysize] = 0.0;
@@ -253,19 +248,20 @@ class GastnerNewmann {
         this.cart_density(t+1.0*h,s2,xsize,ysize);
         this.cart_density(t+1.5*h,s3,xsize,ysize);
         this.cart_density(t+2.0*h,s4,xsize,ysize);
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         this.cart_vgrid(s1,xsize,ysize);
         this.cart_vgrid(s2,xsize,ysize);
         this.cart_vgrid(s3,xsize,ysize);
         this.cart_vgrid(s4,xsize,ysize);
-        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        
         
         esqmax = drsqmax = 0;
 
         for(p=0;p<npoints;p++) {
             rx1 = pointx[p];
             ry1 = pointy[p];
-
             var tup = this.cart_velocity(rx1,ry1,s0,xsize,ysize);
             v1x = tup[0];
             v1y = tup[1];
@@ -413,6 +409,7 @@ class GastnerNewmann {
 
         ix = Math.round(ix);
         iy = Math.round(iy);
+
         var vxp = w11*this.vxt[s][ix][iy] + w21*this.vxt[s][ix+1][iy] +
                   w12*this.vxt[s][ix][iy+1] + w22*this.vxt[s][ix+1][iy+1];
 
@@ -439,9 +436,11 @@ function creategrid(xsize,ysize) {
     }
     return [gridx,gridy];
 }
+/*
 var xsize = 5;
-var ysize = 5;
+var ysize = 6;
 var inputTestData = DCT2.initialize2DArray(xsize,ysize);
+console.log(inputTestData);
 
 //assign the test data
 for (var i=0;i<xsize;i++) {
@@ -451,19 +450,19 @@ for (var i=0;i<xsize;i++) {
 }
 
 
-//var test = new GastnerNewmann();
+var test = new GastnerNewmann();
 //Do the various stages as stated in the documentation of cart.c
-//test.cart_makews(xsize,ysize);
-//test.cart_transform(inputTestData,xsize,ysize);
+test.cart_makews(xsize,ysize);
+test.cart_transform(inputTestData,xsize,ysize);
 //fftrho remember is where the output of the DCT of the input data is stored.
-//var temp = creategrid(xsize,ysize);
-//var gridx = temp[0];
-//var gridy = temp[1];
-//var tup = test.cart_makecart(gridx,gridy,(xsize+1)*(ysize+1),xsize,ysize,0);
+var temp = creategrid(xsize,ysize);
+var gridx = temp[0];
+var gridy = temp[1];
+var tup = test.cart_makecart(gridx,gridy,(xsize+1)*(ysize+1),xsize,ysize,0);
 
-//gridx = tup[0];
-//gridy = tup[1];
-//for(var i =0;i<gridx.length;i++) {
-    //console.log(gridx[i],gridy[i]);
-//}
+gridx = tup[0];
+gridy = tup[1];
+for(var i =0;i<gridx.length;i++) {
+    console.log(gridx[i],gridy[i]);
+}*/
 module.exports = GastnerNewmann;
