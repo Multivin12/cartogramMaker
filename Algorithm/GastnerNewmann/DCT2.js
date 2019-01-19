@@ -50,9 +50,9 @@ class DCT2{
 
         var M = DCT2.getNoOfRows(_2DArray);
         var N = DCT2.getNoOfColumns(_2DArray);
-
+        console.time('test');
         var output = DCT2.initialize2DArray(M,N);
-
+        console.time('test');
         for (var m = 0; m < M; m++) {
             for(var n = 0; n < N; n++) {
                 var temp = 0;
