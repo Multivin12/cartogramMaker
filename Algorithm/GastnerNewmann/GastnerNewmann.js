@@ -6,6 +6,9 @@ const DCT2 = require('./DCT2.js');
 const INITH = 0.001; //Initial size of a time step
 const TARGETERROR = 0.01; // Desired accuracy per step in pixels
 const MAXRATIO = 4.0; //Max ratio to increase step size by
+const napa = require('napajs');
+const os = require('os');
+const NUMBER_OF_WORKERS = os.cpus().length;
 
 class GastnerNewmann {
 
@@ -70,7 +73,7 @@ class GastnerNewmann {
         this.spp = null;
         //calculate initial density and velocity for snapshot zero
         this.cart_density(0.0,0,xsize,ysize);
-
+        
         this.cart_vgrid(0,xsize,ysize);
         s = 0;
         
@@ -79,7 +82,7 @@ class GastnerNewmann {
         t = 0.5*blur*blur;
         h = INITH;
 
-        while(this.drp>0.0) {
+        while(this.drp>0) {
 
             /* Do a combined triple integration step */
 
@@ -110,11 +113,12 @@ class GastnerNewmann {
     cart_density(t,s,xsize,ysize) {
         var ix,iy,kx,ky,expkx = null;
         
+        
         for(iy=0; iy<ysize; iy++) {
             ky = Math.PI*iy/ysize;
             this.expky[iy] = Math.exp(-ky*ky*t);
         }
-        
+
         for(ix=0; ix<xsize;ix++) {
             kx = Math.PI*ix/xsize;
             expkx = Math.exp(-kx*kx*t);
@@ -123,12 +127,13 @@ class GastnerNewmann {
                 this.fftexpt[ix][iy] = expkx*this.expky[iy]*this.fftrho[ix][iy];
             }
         }
-        
+
         //Perform iDCT
         /*make plans for the back transforms*/
         //Using the iDCT
-        
-        var temp = DCT2.performiDCT2(this.fftexpt);
+        console.time('test');
+        var temp = DCT2.performIDCT2(this.fftexpt,xsize,ysize);
+        console.timeEnd('test');
         this.rhot[s] = temp;
         
     }
@@ -215,7 +220,6 @@ class GastnerNewmann {
      * @param {int} ysize - size of grid
      */
     cart_twosteps(pointx,pointy,npoints,t,h,s,xsize,ysize) {
-        //for drp,errorp and spp use this
         var s0,s1,s2,s3,s4;
         var p;
         var rx1,ry1;
@@ -243,6 +247,8 @@ class GastnerNewmann {
         s3 = (s+3)%5;
         s4 = (s+4)%5;
 
+        //Slow part of program
+        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         this.cart_density(t+0.5*h,s1,xsize,ysize);
         this.cart_density(t+1.0*h,s2,xsize,ysize);
         this.cart_density(t+1.5*h,s3,xsize,ysize);
@@ -252,7 +258,8 @@ class GastnerNewmann {
         this.cart_vgrid(s2,xsize,ysize);
         this.cart_vgrid(s3,xsize,ysize);
         this.cart_vgrid(s4,xsize,ysize);
-
+        ///////////////////////////////////////////////////////////////////////////////////////////////////////////
+        
         esqmax = drsqmax = 0;
 
         for(p=0;p<npoints;p++) {

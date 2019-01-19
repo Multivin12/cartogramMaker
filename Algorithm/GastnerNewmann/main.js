@@ -68,16 +68,17 @@ function main(densityFile,xsize,ysize) {
 
     //Do the various stages as stated in the documentation of cart.c
     obj.cart_makews(xsize,ysize);
+    
     obj.cart_transform(inputData,xsize,ysize);
+    
     var temp = creategrid(xsize,ysize);
     var gridx = temp[0];
     var gridy = temp[1];
     var tup = obj.cart_makecart(gridx,gridy,(xsize+1)*(ysize+1),xsize,ysize,0);
-
     gridx = tup[0];
     gridy = tup[1];
 
     printOutput(gridx,gridy);
 }
 
-main("GridFile.txt",5,5);
+main("GridFile.txt",50,50);

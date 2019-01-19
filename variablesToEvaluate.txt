@@ -1,0 +1,2 @@
+blur (0.1 to 20, default 0)
+grid Size
