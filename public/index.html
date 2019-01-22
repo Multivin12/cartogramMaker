@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title> Homepage </title>
+        <link rel="stylesheet" type="text/css" href="CSSFiles/index.css" >
+    </head>
+    <body>
+        <header>
+            <h1>The Cartogram Maker</h1>
+            <h2>The easy way to generate cartograms.</h2> 
+        </header>
+
+        <div id="Instructions">
+
+        </div>
+
+        <div id="fileUpload">
+            <h1> Upload SVG or GeoJSON file here. </h1>
+            <form action="fileupload" method="POST" enctype="multipart/form-data">
+                <input type="file" name="filetoupload" accept=".svg"> <br>
+                <input type="submit">
+            </form>
+        </div>
+    </body>
+</html>

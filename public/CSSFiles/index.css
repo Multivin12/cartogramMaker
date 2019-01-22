@@ -1,0 +1,15 @@
+body {margin:0;padding:0;}
+html {height:100%;width:100%;}
+body{
+    background-color: #57d06c;
+    font-family:'Verdana';
+}
+header{
+    background-color:white;
+    text-align: center;
+    color:green;
+    position:relative;
+    top:-1.5em;
+    height:100px;
+}
+

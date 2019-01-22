@@ -7,9 +7,11 @@ const formidable = require('formidable');
 const app = express();
 const path = require('path');
 
+app.use(express.static(__dirname + '/public'));
+
 //homepage
 app.get('/',(req,res) => {
-    res.sendFile(path.join(__dirname+'/HTML_templates/index.html'));
+    res.sendFile(path.join(__dirname+'/public/index.html'));
 });
 
 //method for uploading a file
@@ -34,9 +36,9 @@ app.post('/fileupload',(req,res) =>{
     //The event that is run when the file upload has been completed
     form.on('end', () => {
         if(success) {
-            res.sendFile(__dirname + '/HTML_templates/uploadSuc.html');
+            res.sendFile(__dirname + '/public/uploadSuc.html');
         } else {
-            res.sendFile(__dirname + '/HTML_templates/index.html')
+            res.sendFile(__dirname + '/public/index.html')
         }
     })
 });
