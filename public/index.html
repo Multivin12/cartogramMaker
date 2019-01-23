@@ -11,16 +11,36 @@
             <h2>The easy way to generate cartograms.</h2> 
         </header>
 
-        <div id="Instructions">
+        <div id="main">
+            <div id="Instructions">
+                <h1> Instructions for use: </h1>
+                <p>The program has a very simple workflow that is described below.</p>
+                <ul>
+                    <li>Upload the map file that you want to transform (Note: must be either in an SVG or GeoJSON file format). </li>
+                    <li>Upload the file containing the corresponding data points for that map file.</li>
+                    <li>Select continue at the bottom of this page.</li>
+                    <li> This will display a preview of your uploaded map file. If you like the preview you can then select continue
+                        or back if not. The system will then compute the cartogram using the Gastner-Newman algorithm.
+                    </li>
+                    <li>The system similarly to the previous step will preview the cartogram it has created.</li>
+                    <li>If you like what you see, click download to download the file </li>
+                    <li>Select return to return back to this page.</li>
+                </ul>
+            </div>
 
-        </div>
+            <div id="mapFileUpload">
+                <h1> Upload map file. </h1>
 
-        <div id="fileUpload">
-            <h1> Upload SVG or GeoJSON file here. </h1>
-            <form action="fileupload" method="POST" enctype="multipart/form-data">
-                <input type="file" name="filetoupload" accept=".svg"> <br>
-                <input type="submit">
-            </form>
+                <form action="mapFileUpload" method="POST" enctype="multipart/form-data">
+                    <input type="file" name="filetoupload" accept=".svg"> <br>
+                    <input type="file" name="datafiletoupload" accept=".svg"> <br>
+                    <input type="submit">
+                </form>
+
+                
+                <h1> Upload data. </h1>
+
+            </div>
         </div>
     </body>
 </html>

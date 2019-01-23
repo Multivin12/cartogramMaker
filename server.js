@@ -15,11 +15,11 @@ app.get('/',(req,res) => {
 });
 
 //method for uploading a file
-app.post('/fileupload',(req,res) =>{
+app.post('/mapFileUpload',(req,res) =>{
 
     var form = new formidable.IncomingForm();
+    console.log(form);
     var success = null;
-
     
     form.parse(req);
 
@@ -36,11 +36,12 @@ app.post('/fileupload',(req,res) =>{
     //The event that is run when the file upload has been completed
     form.on('end', () => {
         if(success) {
-            res.sendFile(__dirname + '/public/uploadSuc.html');
+            res.sendFile(__dirname + '/public/displayMapFile.html');
+            //launch file handle class
         } else {
-            res.sendFile(__dirname + '/public/index.html')
+            res.sendFile(__dirname + '/public/index.html');
         }
-    })
+    });
 });
 
 app.listen(3000);
