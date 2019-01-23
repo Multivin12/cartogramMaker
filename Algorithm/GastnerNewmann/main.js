@@ -21,8 +21,6 @@ function readpop(filename) {
         }
     }
 
-    console.log(inputData);
-
     var ix,iy;
     var mean;
     var sum=0.0;
