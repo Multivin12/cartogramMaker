@@ -1,15 +1,42 @@
-body {margin:0;padding:0;}
-html {height:100%;width:100%;}
+body {
+    margin:0;
+    padding:0;
+    width:100%;
+}
+html {
+    height:100%;
+    width:100%;
+}
 body{
-    background-color: #57d06c;
+    height:100%;
     font-family:'Verdana';
+    background-color: #57d06c;
+    text-align: center;
+    align-content: center;
+    display:inline-block;
 }
 header{
     background-color:white;
-    text-align: center;
     color:green;
     position:relative;
     top:-1.5em;
     height:100px;
 }
-
+#main{
+    background-color: #57d06c;
+    position:relative;
+    top:-2.87em;
+    color:white;
+    text-align:left;
+    left:30%;
+    width:70%;
+}
+#Instructions{
+    position:relative;
+    top:2em;
+    max-width:70%;
+}
+#mapFileUpload{
+    position:relative;
+    top:2em;
+}
