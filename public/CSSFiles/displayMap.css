@@ -22,22 +22,26 @@ header{
     top:-1.5em;
     height:100px;
 }
-#main{
-    background-color: #57d06c;
+header h1{
     position:relative;
-    top:-2.87em;
-    color:white;
-    text-align:left;
-    left:30%;
-    width:70%;
+    top:30%;
 }
-#Instructions{
+canvas{
+    border: 1px solid black;
+}
+#yesButton{
     position:relative;
-    top:2em;
-    max-width:70%;
     font-size: 20px;
-}
-#fileUpload{
-    position:relative;
+    height:3em;
+    right:10%;
+    width:12em;
     top:2em;
+}
+#noButton{
+    position:relative;
+    font-size: 20px;
+    bottom:1em;
+    left:10%;
+    height:3em;
+    width:12em;
 }
