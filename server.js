@@ -1,19 +1,21 @@
 //express is for handling requests
 const express = require('express');
-
+//passing template variables into html
+const nunjucks = require('nunjucks');
 //formidable is for handling file uploads
 const formidable = require('formidable');
-
 const app = express();
 const path = require('path');
-
-
-app.use(express.static(__dirname + '/public'));
+//and this is set to public
+nunjucks.configure('views', { autoescape: true, express: app });
+//nunjucks works when this is set to views
+app.use(express.static(__dirname + 'public'));
 
 
 //homepage
 app.get('/',(req,res) => {
-    res.sendFile(path.join(__dirname+'/public/index.html'));
+    var a = "cheese";
+    res.render(path.join(__dirname+'/public/index.html'),{foo : a});
 });
 
 //method for uploading a file
