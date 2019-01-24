@@ -3,11 +3,10 @@
     <head>
         <meta charset="UTF-8">
         <title>Display Map File</title>
-        <link rel="stylesheet" type="text/css" href="CSSFiles/displayMap.css" >
-        <script src="ClientSideJavascript/drawMapFile.js"></script>
-        <script src="nunjucks.js"></script>
+        <link rel="stylesheet" type="text/css" href="/css/displayMap.css" >
+        <script src="js/drawMapFile.js"></script>
     </head>
-    <body>
+    <body onload= "drawMap( {{send}} )">
         <div id="main">
             <header>
                 <h1>Is this the file you uploaded?</h1>
