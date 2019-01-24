@@ -1,3 +1,3 @@
-function load(variable) {
+function drawMap(variable) {
     alert(variable);
 }

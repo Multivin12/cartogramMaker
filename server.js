@@ -6,16 +6,15 @@ const nunjucks = require('nunjucks');
 const formidable = require('formidable');
 const app = express();
 const path = require('path');
-//and this is set to public
+//set the directory to look for templates
 nunjucks.configure('views', { autoescape: true, express: app });
-//nunjucks works when this is set to views
-app.use(express.static(__dirname + 'public'));
+//set the directory to look for static files
+app.use(express.static(path.join(__dirname , '/public')));
 
 
 //homepage
 app.get('/',(req,res) => {
-    var a = "cheese";
-    res.render(path.join(__dirname+'/public/index.html'),{foo : a});
+    res.render(path.join(__dirname+'/views/index.html'));
 });
 
 //method for uploading a file
@@ -55,11 +54,16 @@ app.post('/fileUpload',(req,res) =>{
 
     //The event that is run when the file upload has been completed
     form.on('end', () => {
+        var value = [1,2,3,4,5];
         if(success) {
-            res.sendFile(__dirname + '/public/displayMapFile.html');
-            //launch file handle class
+            res.render(__dirname + '/views/displayMapFile.html',{data :{array:value}});
         } else {
-            res.sendFile(__dirname + '/public/index.html');
+            if(success == null) {
+                res.render(__dirname + '/views/index.html');
+            } else {
+                var statusError = "Sorry something went wrong please try again.";
+                res.render(__dirname + '/views/index.html',{ status : statusError});
+            }
         }
     });
 });
