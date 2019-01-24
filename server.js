@@ -7,7 +7,9 @@ const formidable = require('formidable');
 const app = express();
 const path = require('path');
 
+
 app.use(express.static(__dirname + '/public'));
+
 
 //homepage
 app.get('/',(req,res) => {
@@ -15,21 +17,37 @@ app.get('/',(req,res) => {
 });
 
 //method for uploading a file
-app.post('/mapFileUpload',(req,res) =>{
+app.post('/fileUpload',(req,res) =>{
 
     var form = new formidable.IncomingForm();
-    console.log(form);
     var success = null;
     
     form.parse(req);
 
     //The event that is run when a new file has been detected
     form.on('fileBegin', (name, file) => {
-        if (file.name === "") {
-            success = false;
-        } else {
-            file.path = __dirname + '/uploads/' + file.name;
-            success = true;
+        var fileExt = path.extname(file.name);
+
+        if(name == "mapfiletoupload") {
+            if (file.name === "" || fileExt !== ".svg") {
+                success = false;
+            } else if((success === false)) {
+                //do nothing as it had failed elsewhere
+            } else {
+                file.path = __dirname + '/uploads/' + file.name;
+                success = true;
+            }
+        }
+        
+        if(name == "datafiletoupload") {
+            if (file.name === "" || fileExt !== ".csv") {
+                success = false;
+            } else if((success === false)) {
+                //do nothing as it had failed elsewhere
+            } else {
+                file.path = __dirname + '/uploads/' + file.name;
+                success = true;
+            }
         }
     });
 

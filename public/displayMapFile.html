@@ -3,11 +3,23 @@
     <head>
         <meta charset="UTF-8">
         <title>Display Map File</title>
-        <link rel="stylesheet" type="text/css" href="CSSFiles/index.css" >
+        <link rel="stylesheet" type="text/css" href="CSSFiles/displayMap.css" >
     </head>
     <body>
-        <header>
-            <h1>Is this the file you uploaded?</h1>
-        </header>
+        <div id="main">
+            <header>
+                <h1>Is this the file you uploaded?</h1>
+            </header>
+
+            <canvas id="mapCanvas" width="1000" height="500"></canvas>
+
+            <form action="makeCartogram" method="POST" enctype="multipart/form-data">
+                <input id="yesButton" type="submit" value="Yes! Build the Cartogram!">
+            </form>
+
+            <form action="" method="POST" enctype="multipart/form-data">
+                <input id="noButton" type="submit" value="No lets go back">
+            </form>
+        </div>
     </body>
 </html>

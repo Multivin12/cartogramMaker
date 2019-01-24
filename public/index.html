@@ -17,7 +17,7 @@
                 <p>The program has a very simple workflow that is described below.</p>
                 <ul>
                     <li>Upload the map file that you want to transform (Note: must be either in an SVG or GeoJSON file format). </li>
-                    <li>Upload the file containing the corresponding data points for that map file.</li>
+                    <li>Upload the file containing the corresponding data points for that map file (Note: must be a CSV file).</li>
                     <li>Select continue at the bottom of this page.</li>
                     <li> This will display a preview of your uploaded map file. If you like the preview you can then select continue
                         or back if not. The system will then compute the cartogram using the Gastner-Newman algorithm.
@@ -28,18 +28,17 @@
                 </ul>
             </div>
 
-            <div id="mapFileUpload">
-                <h1> Upload map file. </h1>
+            <div id="fileUpload">
+                <form action="fileUpload" method="POST" enctype="multipart/form-data">
+                    <h1> Upload map file. </h1>
 
-                <form action="mapFileUpload" method="POST" enctype="multipart/form-data">
-                    <input type="file" name="filetoupload" accept=".svg"> <br>
-                    <input type="file" name="datafiletoupload" accept=".svg"> <br>
+                    <input type="file" name="mapfiletoupload" accept=".svg"> <br>
+
+                    <h1> Upload data. </h1>
+
+                    <input type="file" name="datafiletoupload" accept=".csv"> <br>
                     <input type="submit">
                 </form>
-
-                
-                <h1> Upload data. </h1>
-
             </div>
         </div>
     </body>
