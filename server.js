@@ -10,6 +10,7 @@ const path = require('path');
 nunjucks.configure('views', { autoescape: true, express: app });
 //set the directory to look for static files
 app.use(express.static(path.join(__dirname , '/public')));
+const fs = require('fs');
 
 
 //homepage
@@ -54,9 +55,19 @@ app.post('/fileUpload',(req,res) =>{
 
     //The event that is run when the file upload has been completed
     form.on('end', () => {
-        var value = [1,2,3,4,5];
+
         if(success) {
-            res.render(__dirname + '/views/displayMapFile.html',{data :{array:value}});
+            res.render(__dirname + '/views/displayMapFile.html');
+
+            fs.writeFile("test.txt","1,2,3,4,5",(err) => {
+                if(err) {
+                    console.log(err);
+                }
+                console.log("Saved!");
+            }
+            )
+
+
         } else {
             if(success == null) {
                 res.render(__dirname + '/views/index.html');
