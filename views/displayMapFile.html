@@ -4,8 +4,6 @@
         <meta charset="UTF-8">
         <title>Display Map File</title>
         <link rel="stylesheet" type="text/css" href="/css/displayMap.css" >
-        <script type="text/javascript" src="js/drawMapFile.js"></script>
-        <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     </head>
     <body>
         <div id="main">
@@ -13,7 +11,7 @@
                 <h1>Is this the file you uploaded?</h1>
             </header>
 
-            <canvas id="mapCanvas" width="1000" height="500"></canvas>
+            <img src="images/text.png" alt="Image of Map"> 
 
             <form action="makeCartogram" method="POST" enctype="multipart/form-data">
                 <input id="yesButton" type="submit" value="Yes! Build the Cartogram!">

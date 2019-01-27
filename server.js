@@ -12,6 +12,11 @@ nunjucks.configure('views', { autoescape: true, express: app });
 app.use(express.static(path.join(__dirname , '/public')));
 const fs = require('fs');
 
+//Modules required for drawing maps onto the canvas
+const {createCanvas, loadImage} = require('canvas');
+const canvas = createCanvas(1000,500);
+const ctx = canvas.getContext('2d');
+
 
 //homepage
 app.get('/',(req,res) => {
@@ -57,17 +62,31 @@ app.post('/fileUpload',(req,res) =>{
     form.on('end', () => {
 
         if(success) {
+
+            //Draw a blackbox into a png file
+            var color = "rgb("+175+","+238+","+238+")";
+
+            ctx.beginPath();
+            ctx.moveTo(0, 00);
+            ctx.lineTo(0, 800);
+            ctx.lineTo(800, 800);
+            ctx.lineTo(800, 0);
+            ctx.closePath();
+            ctx.lineWidth = 5;
+            ctx.fillStyle = color;
+            ctx.fill();
+
+            //Save the canvas onto an external png file
+            var dataURL = canvas.toDataURL();
+
+            var out = fs.createWriteStream(__dirname + '/public/images/text.png');
+            var stream = canvas.pngStream();
+
+            stream.on('data', function(chunk){out.write(chunk); });
+
+            stream.on('end', function(){console.log('saved png'); });
+
             res.render(__dirname + '/views/displayMapFile.html');
-
-            fs.writeFile("test.txt","1,2,3,4,5",(err) => {
-                if(err) {
-                    console.log(err);
-                }
-                console.log("Saved!");
-            }
-            )
-
-
         } else {
             if(success == null) {
                 res.render(__dirname + '/views/index.html');
