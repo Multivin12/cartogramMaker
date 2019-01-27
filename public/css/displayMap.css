@@ -26,8 +26,9 @@ header h1{
     position:relative;
     top:30%;
 }
-canvas{
-    border: 1px solid black;
+#mapFileImage {
+    position:relative;
+    left:7.5%;
 }
 #yesButton{
     position:relative;
