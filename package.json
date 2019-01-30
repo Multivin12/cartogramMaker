@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
+    "arraylist": "^0.1.0",
     "async": "^2.6.1",
     "canvas": "^2.0.1",
     "canvas-prebuilt": "^2.0.0-alpha.14",
@@ -19,7 +20,8 @@
     "node-gyp": "^3.8.0",
     "node-pre-gyp": "^0.12.0",
     "nodemon": "^1.18.9",
-    "nunjucks": "^3.1.7"
+    "nunjucks": "^3.1.7",
+    "xml2js": "^0.4.19"
   },
   "devDependencies": {},
   "scripts": {

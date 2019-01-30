@@ -12,11 +12,12 @@ nunjucks.configure('views', { autoescape: true, express: app });
 app.use(express.static(path.join(__dirname , '/public')));
 const fs = require('fs');
 
+//Classes for handling map files
+const {SVGLoad, Coordinate,Region,Map} = require('./mapLoad/loadSVGFile.js');
 //Modules required for drawing maps onto the canvas
 const {createCanvas, loadImage} = require('canvas');
 const canvas = createCanvas(1000,500);
 const context = canvas.getContext('2d');
-
 
 //homepage
 app.get('/',(req,res) => {
@@ -41,7 +42,8 @@ app.post('/fileUpload',(req,res) =>{
             } else if((success === false)) {
                 //do nothing as it had failed elsewhere
             } else {
-                file.path = __dirname + '/uploads/' + file.name;
+                file.path = __dirname + '/uploads/' + "mapFile.svg";
+                mapFileName = file.path;
                 success = true;
             }
         }
@@ -52,7 +54,7 @@ app.post('/fileUpload',(req,res) =>{
             } else if((success === false)) {
                 //do nothing as it had failed elsewhere
             } else {
-                file.path = __dirname + '/uploads/' + file.name;
+                file.path = __dirname + '/uploads/' + "dataFile.csv";
                 success = true;
             }
         }
