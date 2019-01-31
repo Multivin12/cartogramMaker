@@ -13,11 +13,8 @@ app.use(express.static(path.join(__dirname , '/public')));
 const fs = require('fs');
 
 //Classes for handling map files
-const {SVGLoad, Coordinate,Region,Map} = require('./mapLoad/loadSVGFile.js');
+const {SVGLoader, SVGCoordinate,Region,Map} = require('./mapLoad/loadSVGFile.js');
 //Modules required for drawing maps onto the canvas
-const {createCanvas, loadImage} = require('canvas');
-const canvas = createCanvas(1000,500);
-const context = canvas.getContext('2d');
 
 //homepage
 app.get('/',(req,res) => {
@@ -64,12 +61,12 @@ app.post('/fileUpload',(req,res) =>{
     form.on('end', () => {
 
         if(success) {
-
+            /*
             //Draw a blackbox into a png file
             var color = "rgb("+63+","+0+","+0+")";
 
-            var width = canvas.width / 2;
-            var height = canvas.height / 2;
+            var width = canvas.width;
+            var height = canvas.height ;
 
             // draw a red circle
             var radius = 100;
@@ -104,7 +101,7 @@ app.post('/fileUpload',(req,res) =>{
             stream.on('data', function(chunk){out.write(chunk); });
 
             stream.on('end', function(){console.log('saved png'); });
-
+            */
             res.render(__dirname + '/views/displayMapFile.html');
         } else {
             if(success == null) {
