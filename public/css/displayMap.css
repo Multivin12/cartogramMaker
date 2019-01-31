@@ -26,10 +26,6 @@ header h1{
     position:relative;
     top:30%;
 }
-#mapFileImage {
-    position:relative;
-    left:7.5%;
-}
 #yesButton{
     position:relative;
     font-size: 20px;

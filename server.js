@@ -13,7 +13,8 @@ app.use(express.static(path.join(__dirname , '/public')));
 const fs = require('fs');
 
 //Classes for handling map files
-const {SVGLoader, SVGCoordinate,Region,Map} = require('./mapLoad/loadSVGFile.js');
+const SVGFileHandle = require('./mapLoad/loadSVGFile.js');
+const SVGLoader = SVGFileHandle.SVGLoader;
 //Modules required for drawing maps onto the canvas
 
 //homepage
@@ -61,47 +62,12 @@ app.post('/fileUpload',(req,res) =>{
     form.on('end', () => {
 
         if(success) {
-            /*
-            //Draw a blackbox into a png file
-            var color = "rgb("+63+","+0+","+0+")";
-
-            var width = canvas.width;
-            var height = canvas.height ;
-
-            // draw a red circle
-            var radius = 100;
-            context.fillStyle = 'red';
-            context.beginPath();
-            //Corresponds to the M character in the path attribute
-            context.moveTo(156.8,344.0);
-            //Corresponds to the L character
-            context.lineTo(187.5,326.9);
-            context.lineTo(216.8,307.8);
-            context.lineTo(244.5,302.4);
-            context.lineTo(267.8,293.1);
-            context.lineTo(292.4,293,5);
-            context.lineTo(279.0,314.8);
-            context.lineTo(256.9,336.0);
-            context.lineTo(246.5,349.5);
-            context.lineTo(234.6,370.9);
-            context.lineTo(218.1,398.0);
-            context.lineTo(194.7,411.3);
-            context.lineTo(178.6,420.8);
-            context.lineTo(167.2,408.9);
-            context.lineTo(160.4,383.3);
-            context.lineTo(159.2,367.6);
-            //Corresponds to the Z character in the path attribute
-            context.fill();
-
-            //Save the canvas onto an external png file
-
-            var out = fs.createWriteStream(__dirname + '/public/images/text.png');
-            var stream = canvas.pngStream();
-
-            stream.on('data', function(chunk){out.write(chunk); });
-
-            stream.on('end', function(){console.log('saved png'); });
-            */
+            
+            var svgLoader = new SVGLoader();
+            svgLoader.readSVGFile("/../uploads/mapFile.svg");
+            svgLoader.collectMapData();
+            svgLoader.drawMapToFile(path.join(__dirname + '/public/images/map.png'));
+            
             res.render(__dirname + '/views/displayMapFile.html');
         } else {
             if(success == null) {

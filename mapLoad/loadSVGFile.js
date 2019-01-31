@@ -8,8 +8,6 @@ const path = require('path');
 const xml2js = require('xml2js');
 const fs = require('fs');
 const {createCanvas, loadImage} = require('canvas');
-const canvas = createCanvas(1000,500);
-const context = canvas.getContext('2d');
 
 /**
  * Class for handling the process of loading SVG files. Has a field JSON Data which is the
@@ -76,29 +74,79 @@ class SVGLoader {
             var coordinateArray = coordinateString.split(" ");
             var newRegion = new Region();
 
-            for(var j=0;j<coordinateArray.length-1;j++) {
+            for(var j=0;j<coordinateArray.length;j++) {
 
+                var isEnd = false;
+                //nextj is just for telling the loop which index to go to next.
+                var nextj = j;
+                //You know this is the final coordinate of a certain region
+                if(coordinateArray[(j+1)] === "Z") {
+                    isEnd = true;
+                    //skip over the Z because obviously this is not a coordinate
+                    nextj = j+1;
+                }
                 var xycoordinate = coordinateArray[j].match(/\d+\.\d/g);
                 var drawChar = coordinateArray[j][0];
+                var newCoordinate = new SVGCoordinate(drawChar,xycoordinate[0],xycoordinate[1],isEnd);
 
-                //At this point you've got the final coordinate of the region 
-                //not coordinateArray.length-1 as the Z charater is stored herew
-                if(j === coordinateArray.length-2) {
-                    //set to true because this is the last coordinate
-                    var newCoordinate = new SVGCoordinate(drawChar,xycoordinate[0],xycoordinate[1],true);
-                } else {
-                    var newCoordinate = new SVGCoordinate(drawChar,xycoordinate[0],xycoordinate[1],false);
-                }
                 newRegion.addCoordinate(newCoordinate);
+                j = nextj;
             }
+            
             this.map.addRegion(newRegion);
         }
     }
 
-    drawMapToFile(fileName) {
-        var color  = "rgb("+63+","+0+","+0+")";
 
+    /** 
+     * Method for drawing the map onto a png file which can then be loaded into
+     * by the html. 
+    */
+    drawMapToFile(filePath) {
+
+        const canvas = createCanvas(parseInt(this.map.xsize),parseInt(this.map.ysize));
+        const context = canvas.getContext('2d');
+
+        //Draw the rectangle with a blue background
+        context.beginPath();
+        context.lineWidth = 3;
+        context.rect(0,0,canvas.width,canvas.height);
+        context.strokeStyle = 'rgb(0,0,0)';
+        context.fillStyle = 'rgb(35, 106, 169)';
+        context.fill();
+        context.stroke();
+
+        //Draw the SVG Data into the rectangle
+        context.strokeStyle = 'rgb(0,0,0)';
+        context.fillStyle = 'green';
+        context.lineWidth = 3;
+
+        for(var i=0;i<this.map.regions.length;i++) {
+            context.beginPath();
+            for(var j=0;j<this.map.regions[i].coordinates.length;j++) {
+                var coordinate = this.map.regions[i].coordinates[j];
+                if(coordinate.drawChar === 'M') {
+                    context.moveTo(coordinate.x,coordinate.y);
+                } else {
+                    context.lineTo(coordinate.x,coordinate.y);
+                }
+
+                if(coordinate.ZPresent) {
+                    context.stroke();
+
+                    //Corresponds to the Z character in the path attribute
+                    context.fill();
+                }
+            }
+        }
         
+        //Save the canvas onto an external png file
+        var out = fs.createWriteStream(filePath);
+        var stream = canvas.pngStream();
+
+        stream.on('data', function(chunk){out.write(chunk); });
+
+        stream.on('end', function(){console.log('saved png'); });
     }
 }
 
@@ -163,10 +211,11 @@ class Map {
 
 
 //tests
+
 var svgLoad = new SVGLoader();
-svgLoad.readSVGFile("/../uploads/mapFile.svg");
+svgLoad.readSVGFile("/../SVGFiles/africa.svg");
 svgLoad.collectMapData();
-svgLoad.drawMap();
+//svgLoad.drawMapToFile("outputFile.txt");
 
 module.exports = { SVGLoader: SVGLoader,
                    SVGCoordinate: SVGCoordinate,
