@@ -92,7 +92,6 @@ class SVGLoader {
                 newRegion.addCoordinate(newCoordinate);
                 j = nextj;
             }
-            
             this.map.addRegion(newRegion);
         }
     }
@@ -150,19 +149,14 @@ class SVGLoader {
     }
 }
 
-class SVGCoordinate {
+/**
+ * Class for a general Coordinate. This is what is used in HTML canvas.
+ */
+class Coordinate {
 
-    /**
-     * Constructor for this class that takes two ints as an argument
-     * corresponding to the x,y of the coordinate, the drawType character which is a 
-     * SVG letter corresponding to M or L meaning move to and draw line to respectively
-     * and a boolean to mark if the coordinate is the last one in the region.
-     */
-    constructor(drawChar,x,y,ZPresent) {
-        this.drawChar = drawChar;
+    constructor(x,y) {
         this.x = x;
         this.y = y;
-        this.ZPresent = ZPresent;
     }
 
     /**
@@ -171,6 +165,25 @@ class SVGCoordinate {
     printCoordinate() {
         console.log("(" + this.x + ","+ this.y + ")");
     }
+}
+
+/**
+ * Class for handling the SVG Coordinate system
+ */
+class SVGCoordinate extends Coordinate{
+
+    /**
+     * Constructor for this class that takes two ints as an argument
+     * corresponding to the x,y of the coordinate, the drawType character which is a 
+     * SVG letter corresponding to M or L meaning move to and draw line to respectively
+     * and a boolean to mark if the coordinate is the last one in the region.
+     */
+    constructor(drawChar,x,y,ZPresent) {
+        super(x,y);
+        this.drawChar = drawChar;
+        this.ZPresent = ZPresent;
+    }
+
 }
 
 /**
@@ -185,8 +198,55 @@ class Region {
         this.coordinates = new ArrayList();
     }
 
+    /**
+     * Method for adding a Coordinate object to the collection.
+     * @param {Coordinate} c 
+     */
     addCoordinate(c) {
         this.coordinates.add(c);
+    }
+
+    getArea() {
+        if(this.coordinates.length === 0) {
+            return 0;
+        }
+
+        //Have to convert to a set of cartesian coordinates
+        var arrCoordinates = new Array(this.coordinates.length);
+        var totalArea = 0;
+        //Variable to record the start position of the polygon
+        var firstVertexIndex = 0;
+
+        for(var i=0;i<this.coordinates.length;i++) {
+
+            //If the draw character is M it means it's the start of the polygon
+            if(this.coordinates.get(i).drawChar === 'M') {
+                firstVertexIndex = i;
+            }
+
+            var x = this.coordinates.get(i).x;
+            var y = this.coordinates.get(i).y;
+            arrCoordinates[i] = new Coordinate(x,y);
+            console.log(this.coordinates.get(i));
+
+            //If the Z is present means it is the end of the polygon
+            if(this.coordinates.get(i).ZPresent) {
+                //Since this is the end you then calculate the area
+                var currentArea = 0;
+
+                for(var j=firstVertexIndex;j<=i;j++) {
+                    if(j === i) {
+                        currentArea += (arrCoordinates[j].x*arrCoordinates[firstVertexIndex].y - arrCoordinates[j].y*arrCoordinates[firstVertexIndex].x);
+                    } else {
+                        currentArea += (arrCoordinates[j].x*arrCoordinates[(j+1)].y - arrCoordinates[j].y*arrCoordinates[(j+1)].x);
+                    }
+                }
+                currentArea = Math.abs(currentArea);
+                currentArea = currentArea/2;
+                totalArea += currentArea;
+                console.log(totalArea);
+            }
+        }
     }
 }
 
@@ -215,7 +275,9 @@ class Map {
 var svgLoad = new SVGLoader();
 svgLoad.readSVGFile("/../SVGFiles/africa.svg");
 svgLoad.collectMapData();
-//svgLoad.drawMapToFile("outputFile.txt");
+
+console.log(svgLoad.map.regions.get(0).getArea());
+//svgLoad.drawMapToFile(path.join(__dirname + "/../public/images/map.png"));
 
 module.exports = { SVGLoader: SVGLoader,
                    SVGCoordinate: SVGCoordinate,

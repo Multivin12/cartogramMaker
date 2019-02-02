@@ -10,11 +10,10 @@ const path = require('path');
 nunjucks.configure('views', { autoescape: true, express: app });
 //set the directory to look for static files
 app.use(express.static(path.join(__dirname , '/public')));
-const fs = require('fs');
-
 //Classes for handling map files
 const SVGFileHandle = require('./mapLoad/loadSVGFile.js');
 const SVGLoader = SVGFileHandle.SVGLoader;
+
 //Modules required for drawing maps onto the canvas
 
 //homepage
