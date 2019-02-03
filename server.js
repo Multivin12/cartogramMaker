@@ -13,6 +13,7 @@ app.use(express.static(path.join(__dirname , '/public')));
 //Classes for handling map files
 const SVGFileHandle = require('./mapLoad/loadSVGFile.js');
 const SVGLoader = SVGFileHandle.SVGLoader;
+const fs = require('fs');
 
 //Modules required for drawing maps onto the canvas
 
@@ -77,6 +78,55 @@ app.post('/fileUpload',(req,res) =>{
             }
         }
     });
+});
+
+//Method for generating the cartogram
+app.get("/makeCartogram",(req,res) => {
+
+    //Collect the map data again from the map file
+    var svgLoader = new SVGLoader();
+    svgLoader.readSVGFile("/../uploads/mapFile.svg");
+    svgLoader.collectMapData();
+
+    //An array for storing the areas of every region in the map
+    var areas = new Array(svgLoader.map.regions.length);
+
+    for(var i=0;i<areas.length;i++) {
+        areas[i] = svgLoader.map.regions.get(i).getArea();
+    }
+
+    //gather the data from the data file for each region
+    var dataBuffer = fs.readFileSync(path.join(__dirname + "/uploads/dataFile.csv"));
+    var data = dataBuffer.toString();
+
+    var dataArray = data.split(",");
+
+    //density array with the final element being the average density of the map
+    //as the sea is required to be the average density
+    var densityArray = new Array(areas.length+1);
+
+    //Create a density array: Density is defined as the data value for a certain region / area of the region.
+    var total = 0;
+    for(var i=0;i<areas.length;i++) {
+        densityArray[i] = parseInt(dataArray[i])/parseInt(areas[i]);
+        total += densityArray[i];
+    }
+    var averageDensity = total / areas.length;
+    densityArray[areas.length] = averageDensity;
+
+
+    //Here we calculate the matrix of densities
+    //corresponds to the number of density values NOT the grid size.
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    var xsize = 50;
+    var ysize = 50;
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    
+
+
+
+    res.render(__dirname + "/views/displayCartogramWait.html");
 });
 
 app.listen(3000);

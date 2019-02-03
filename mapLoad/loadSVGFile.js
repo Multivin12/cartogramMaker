@@ -132,7 +132,7 @@ class SVGLoader {
 
                 if(coordinate.ZPresent) {
                     context.stroke();
-
+                    
                     //Corresponds to the Z character in the path attribute
                     context.fill();
                 }
@@ -227,7 +227,6 @@ class Region {
             var x = this.coordinates.get(i).x;
             var y = this.coordinates.get(i).y;
             arrCoordinates[i] = new Coordinate(x,y);
-            console.log(this.coordinates.get(i));
 
             //If the Z is present means it is the end of the polygon
             if(this.coordinates.get(i).ZPresent) {
@@ -244,9 +243,9 @@ class Region {
                 currentArea = Math.abs(currentArea);
                 currentArea = currentArea/2;
                 totalArea += currentArea;
-                console.log(totalArea);
             }
         }
+        return totalArea;
     }
 }
 
@@ -271,14 +270,14 @@ class Map {
 
 
 //tests
-
+/*
 var svgLoad = new SVGLoader();
 svgLoad.readSVGFile("/../SVGFiles/africa.svg");
 svgLoad.collectMapData();
 
 console.log(svgLoad.map.regions.get(0).getArea());
 //svgLoad.drawMapToFile(path.join(__dirname + "/../public/images/map.png"));
-
+*/
 module.exports = { SVGLoader: SVGLoader,
                    SVGCoordinate: SVGCoordinate,
                    Region: Region,
