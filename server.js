@@ -15,7 +15,12 @@ const SVGFileHandle = require('./mapLoad/loadSVGFile.js');
 const SVGLoader = SVGFileHandle.SVGLoader;
 const fs = require('fs');
 
-//Modules required for drawing maps onto the canvas
+//Values for the matrix of densities.
+//corresponds to the number of density values NOT the grid size.
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var xsize = 2;
+var ysize = 2;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
 app.get('/',(req,res) => {
@@ -66,7 +71,8 @@ app.post('/fileUpload',(req,res) =>{
             var svgLoader = new SVGLoader();
             svgLoader.readSVGFile("/../uploads/mapFile.svg");
             svgLoader.collectMapData();
-            svgLoader.drawMapToFile(path.join(__dirname + '/public/images/map.png'));
+            //xsize and ysize passed for drawing the grid just tp get a visualization
+            svgLoader.drawMapToFile(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
             
             res.render(__dirname + '/views/displayMapFile.html');
         } else {
@@ -115,12 +121,6 @@ app.get("/makeCartogram",(req,res) => {
     densityArray[areas.length] = averageDensity;
 
 
-    //Here we calculate the matrix of densities
-    //corresponds to the number of density values NOT the grid size.
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    var xsize = 50;
-    var ysize = 50;
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     
 

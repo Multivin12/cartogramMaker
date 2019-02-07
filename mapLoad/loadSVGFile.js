@@ -101,7 +101,7 @@ class SVGLoader {
      * Method for drawing the map onto a png file which can then be loaded into
      * by the html. 
     */
-    drawMapToFile(filePath) {
+    drawMapToFile(xsize,ysize,filePath) {
 
         const canvas = createCanvas(parseInt(this.map.xsize),parseInt(this.map.ysize));
         const context = canvas.getContext('2d');
@@ -120,6 +120,7 @@ class SVGLoader {
         context.fillStyle = 'green';
         context.lineWidth = 3;
 
+        //Draw the map
         for(var i=0;i<this.map.regions.length;i++) {
             context.beginPath();
             for(var j=0;j<this.map.regions[i].coordinates.length;j++) {
@@ -138,6 +139,31 @@ class SVGLoader {
                 }
             }
         }
+
+        //Draw the grid
+        //variables for scaling the grid number to the actual canvas coordinates
+        var scaleX = this.map.xsize / xsize;
+        var scaleY = this.map.ysize / ysize;
+
+        context.strokeStyle = 'rgb(0,0,0)';
+        context.lineWidth = 3;
+
+        //draw the vertical grids
+        for(var i=0;i<xsize;i++) {
+            context.beginPath();
+            context.moveTo(i*scaleX,0);
+            context.lineTo(i*scaleX,this.map.ysize);
+            context.stroke();
+        }
+
+        //draw the horizontal grids
+        for(var i=0;i<ysize;i++) {
+            context.beginPath();
+            context.moveTo(0,i*scaleY);
+            context.lineTo(this.map.xsize,i*scaleY);
+            context.stroke();
+        }
+
         
         //Save the canvas onto an external png file
         var out = fs.createWriteStream(filePath);
