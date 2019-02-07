@@ -108,7 +108,7 @@ app.get("/makeCartogram",(req,res) => {
     //Create a density array: Density is defined as the data value for a certain region / area of the region.
     var total = 0;
     for(var i=0;i<areas.length;i++) {
-        densityArray[i] = parseInt(dataArray[i])/parseInt(areas[i]);
+        densityArray[i] = parseInt(areas[i]/parseInt(dataArray[i]));
         total += densityArray[i];
     }
     var averageDensity = total / areas.length;
