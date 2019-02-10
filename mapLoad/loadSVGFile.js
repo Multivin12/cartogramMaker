@@ -34,7 +34,7 @@ class SVGLoader {
         parser.parseString(data, (err, result) => {
             if(err){
                 console.log(err);
-                throw new Error;
+                throw new Error();
             } else {
                 //Convert it into a JSON file
                 var JSONData = JSON.stringify(result,null,1);
@@ -306,5 +306,6 @@ console.log(svgLoad.map.regions.get(0).getArea());
 */
 module.exports = { SVGLoader: SVGLoader,
                    SVGCoordinate: SVGCoordinate,
+                   Coordinate: Coordinate,
                    Region: Region,
-                   Map: Map }
+                   Map: Map };

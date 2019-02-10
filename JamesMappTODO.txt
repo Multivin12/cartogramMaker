@@ -1,0 +1,19 @@
+Break down algorithm into the seperate stages and time them:
+Preamble
+Transform
+DCT
+iDCT
+Rebounds
+then back to transform
+(essentially the entire make_cart method)
+
+Test it against these type of data:
+Homogenous data
+Random
+Real World
+
+Always change values as a function of grid size
+
+Time each component and look at the amount of data as this gives the no of iterations
+
+try fft libraries and extract the real part as this is the same as the DCT.
