@@ -98,6 +98,20 @@ class DCT2{
         return _2DArray[0].length;
     }
 
+    //This method is for converting between a 1D to a 2D array
+    static to2DArray(_1DArray,xsize,ysize) {
+        var _2DArray = this.initialize2DArray(xsize,ysize);
+        var counter = 0;
+
+        for(var i=0;i<xsize;i++) {
+            for(var j=0;j<ysize;j++) {
+                _2DArray[i][j] = _1DArray[counter];
+                counter++;
+            }
+        }
+        return _2DArray;
+    }
+
     //This method is used for initializing a 1D array all to zeros
     static initializeArray(i) {
         var _1DArray = [];

@@ -2,24 +2,15 @@
 const OFFSET = 0.005;
 const DCT2 = require('./DCT2.js');
 const GastnerNewmann = require('./GastnerNewmann.js');
-const fs = require('fs');
 var inputData = null;
 
 /* Function for reading from an external file into inputData*/
-function readpop(filename) {
+function readpop(densityGrid) {
 
-    var contents = fs.readFileSync(filename,'utf-8');
-
-    var rows = contents.split("\n");
-    var xsize = rows.length;
-    var ysize = rows[0].split(" ").length;
-
-    inputData = DCT2.initialize2DArray(xsize,ysize);
-    for(var iy=0; iy<ysize;iy++) {
-        for(var ix=0; ix<xsize;ix++) {
-            inputData[ix][iy] = Number(rows[ix].split(" ")[iy]);
-        }
-    }
+    inputData = densityGrid;
+    
+    var xsize = densityGrid[0].length;
+    var ysize = densityGrid.length;
 
     var ix,iy;
     var mean;
@@ -71,9 +62,10 @@ function creategrid(xsize,ysize) {
  * 
  * Output is a set of cordinates for a MATRIX, not a cartesian coordinate system.
  */
-function main(densityFile) {
+function main(densityGrid) {
 
-    var tup = readpop(densityFile);
+
+    var tup = readpop(densityGrid);
 
     xsize = tup[0];
     ysize = tup[1];
@@ -94,7 +86,13 @@ function main(densityFile) {
     gridx = tup[0];
     gridy = tup[1];
 
-    printOutput(gridx,gridy);
+    var gridPoints = new Array(gridx.length);
+
+    for(var i=0;i<gridx.length;i++) {
+        gridPoints[i] = [gridx[i],gridy[i]];
+    }
+
+    return gridPoints;
 }
 
-main("testFile.txt");
+module.exports = main;

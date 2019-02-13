@@ -14,6 +14,8 @@ app.use(express.static(path.join(__dirname , '/public')));
 const {SVGLoader,SVGCoordinate,Coordinate,Region,Map,Grid,GridSquare} = require('./mapLoad/loadSVGFile.js');
 const fs = require('fs');
 const DCT2 = require('./Algorithm/GastnerNewmann/DCT2.js');
+const gastnerNewmann = require('./Algorithm/GastnerNewmann/main.js');
+const Interpreter = require('./Algorithm/GastnerNewmann/interp.js');
 
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
@@ -154,21 +156,14 @@ app.get("/makeCartogram",(req,res) => {
 
     }
 
-    var file = fs.createWriteStream(path.join(__dirname + '/Algorithm/GastnerNewmann/gridFile.txt'));
-    
-    file.on('error',function(err) {
-        console.error(err);
-    })
+    //get the new set of grid points from the Gastner-Newman algorithm
+    var newGridPoints = gastnerNewmann(densityGrid);
 
-    for(var i=0;i<densityGrid.length;i++) {
-        for(var j=0;j<densityGrid[i].length;j++) {
-            file.write(densityGrid[i][j].toString() + " ");
-        }
-        file.write('\n');
-    }
-    file.end();
+    //use an interpreter to convert the region grid points onto the new grid
+    var interp = new Interpreter(newGridPoints,xsize,ysize);
+    interp.interpData(9,9);
 
-    res.render(__dirname + "/views/displayCartogramWait.html");
+    res.render(__dirname + '/views/displayCartogramWait.html');
 });
 
 app.listen(3000);
