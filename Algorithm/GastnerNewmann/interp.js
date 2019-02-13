@@ -10,6 +10,7 @@ class Interpreter {
         //extracting all the x coordinates from the gridPoints
         for(var i=0;i<gridPoints.length;i++) {
             gridx[i] = gridPoints[i][1];
+            console.log(gridx[i]);
         }
 
         //extracting all of the y coordinates from the gridPoints
