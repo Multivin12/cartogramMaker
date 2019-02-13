@@ -75,7 +75,7 @@ class DCT2{
                     }
                 }
 
-                //to get rid off very low numbers not being recognised as zero
+                //to get rid of very low numbers not being recognised as zero
                 var result = temp;
                 var final = Number(result.toFixed(5));
                 if (final === -0) {

@@ -11,9 +11,9 @@ nunjucks.configure('views', { autoescape: true, express: app });
 //set the directory to look for static files
 app.use(express.static(path.join(__dirname , '/public')));
 //Classes for handling map files
-const SVGFileHandle = require('./mapLoad/loadSVGFile.js');
-const SVGLoader = SVGFileHandle.SVGLoader;
+const {SVGLoader,SVGCoordinate,Coordinate,Region,Map,Grid,GridSquare} = require('./mapLoad/loadSVGFile.js');
 const fs = require('fs');
+const DCT2 = require('./Algorithm/GastnerNewmann/DCT2.js');
 
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
@@ -120,11 +120,53 @@ app.get("/makeCartogram",(req,res) => {
     var averageDensity = total / areas.length;
     densityArray[areas.length] = averageDensity;
 
+    //now generate the grid
+    var grid = new Grid(xsize,ysize,svgLoader.map.xsize,svgLoader.map.ysize);
+    //This is the density grid to be passed into the algorithm
+    var densityGrid = DCT2.initialize2DArray(xsize,ysize);
 
+    for(var i=0;i<grid.gridSquares.length;i++) {
+        for(var j=0;j<grid.gridSquares[i].length;j++) {
+            //now for each grid square calculate a certain density
 
+            //Firstly calculate what regions are in the grid square
+            var densityTotal = 0;
+
+            //Need to record wether any of the square is covered by the "sea"
+            var percentTotal = 0;
+
+            for(var k=0;k<svgLoader.map.regions.length;k++) {
+                var curPercentTotal = grid.gridSquares[i][j].getPercentage(svgLoader.map.regions.get(k));
+                percentTotal += curPercentTotal;
+                densityTotal += curPercentTotal*densityArray[k];
+            }
+
+            if(percentTotal == 1) {
+                //just set the density as the density of the sea
+                densityTotal = densityArray[areas.length];
+            } else {
+                var seaPercent = 1-percentTotal;
+
+                densityTotal += seaPercent*densityArray[areas.length];
+            }
+            densityGrid[i][j] = densityTotal;
+        }
+
+    }
+
+    var file = fs.createWriteStream(path.join(__dirname + '/Algorithm/GastnerNewmann/gridFile.txt'));
     
+    file.on('error',function(err) {
+        console.error(err);
+    })
 
-
+    for(var i=0;i<densityGrid.length;i++) {
+        for(var j=0;j<densityGrid[i].length;j++) {
+            file.write(densityGrid[i][j].toString() + " ");
+        }
+        file.write('\n');
+    }
+    file.end();
 
     res.render(__dirname + "/views/displayCartogramWait.html");
 });

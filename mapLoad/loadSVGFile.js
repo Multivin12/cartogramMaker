@@ -8,6 +8,7 @@ const path = require('path');
 const xml2js = require('xml2js');
 const fs = require('fs');
 const {createCanvas, loadImage} = require('canvas');
+const polygonClipping = require('polygon-clipping');
 
 /**
  * Class for handling the process of loading SVG files. Has a field JSON Data which is the
@@ -61,7 +62,7 @@ class SVGLoader {
         var heightNumber = height.replace(/\D/g, "");
         var widthNumber = width.replace(/\D/g, "");
 
-        this.map = new Map(heightNumber,widthNumber);
+        this.map = new Map(parseInt(heightNumber),parseInt(widthNumber));
 
         //Collect the coordinates of all the regions in the map file
         var arrayOfRegions = this.JSONData.svg.g[0].path;
@@ -87,7 +88,7 @@ class SVGLoader {
                 }
                 var xycoordinate = coordinateArray[j].match(/\d+\.\d/g);
                 var drawChar = coordinateArray[j][0];
-                var newCoordinate = new SVGCoordinate(drawChar,xycoordinate[0],xycoordinate[1],isEnd);
+                var newCoordinate = new SVGCoordinate(drawChar,parseFloat(xycoordinate[0]),parseFloat(xycoordinate[1]),isEnd);
 
                 newRegion.addCoordinate(newCoordinate);
                 j = nextj;
@@ -226,7 +227,7 @@ class Region {
 
     /**
      * Method for adding a Coordinate object to the collection.
-     * @param {Coordinate} c 
+     * @param {SVGCoordinate} c 
      */
     addCoordinate(c) {
         this.coordinates.add(c);
@@ -273,6 +274,58 @@ class Region {
         }
         return totalArea;
     }
+
+    /**
+     * Method for getting the amount of area within a grid square.
+     * Returns a floating point number corresponding to the area of the region
+     * inside the grid square.
+     * 
+     * @param {GridSquare} g - the grid square
+     */
+    getAreaInGridSquare(g) {
+
+        //firstly need to convert the region and grid square to an unconventional format
+        //that is used by the polygon clipping library.
+        var regionArray = [];
+        regionArray[0] = [this.coordinates.length];
+        for(var i=0;i<this.coordinates.length;i++) {
+            regionArray[0][i] = [this.coordinates.get(i).x,this.coordinates.get(i).y];
+        }
+
+        //and then the same for the gridSquare
+        var gridArray = [];
+        gridArray[0] = [4];
+        gridArray[0][0] = [g.topLeft.x,g.topLeft.y];
+        gridArray[0][1] = [g.topRight.x,g.topRight.y];
+        gridArray[0][2] = [g.bottomRight.x,g.bottomRight.y];
+        gridArray[0][3] = [g.bottomLeft.x,g.bottomLeft.y];
+
+        //Now need to convert this intersection back to a region
+        var intersectionFull = polygonClipping.intersection(regionArray, gridArray);
+
+        //Meaning there is no intersection
+        if(intersectionFull.length === 0) {
+            return 0;
+        }
+
+        var intersection = intersectionFull[0][0];
+
+        var newRegion = new Region();
+
+        //Only to the penultimate coordinate as it repeats the first coordinate again at the end
+        for(var i=0;i<intersection.length-1;i++) {
+            if(i ==0) {
+                var newCoordinate = new SVGCoordinate("M",intersection[i][0],intersection[i][1],false);
+            } else if (i == (intersection.length-2)) {
+                var newCoordinate = new SVGCoordinate("L",intersection[i][0],intersection[i][1],true);
+            } else {
+                var newCoordinate = new SVGCoordinate("L",intersection[i][0],intersection[i][1],false);
+            }
+            newRegion.addCoordinate(newCoordinate);
+        }
+
+        return newRegion.getArea();
+    }
 }
 
 /**
@@ -281,7 +334,7 @@ class Region {
 class Map {
 
     /**
-     * Constructor that takes in an empty argument.
+     * Constructor that takes in an argument corresponding to the size of the map in pixels..
      */
     constructor(xsize,ysize) {
         this.regions = new ArrayList();
@@ -294,6 +347,88 @@ class Map {
     }
 }
 
+/**
+ * Class for handling the grid that is projected onto the map before being processed by the algorithm
+ */
+class Grid {
+
+    /**
+     * 
+     * @param {int} xsizeGrid - X size of the grid
+     * @param {int} ysizeGrid - Y size of the grid
+     * @param {int} ysizeCanvas - Number of pixels in the x direction in the canvas
+     * @param {int} ysizeCanvas  - Number of pixels in the y direction in the canvas
+     */
+    constructor(xsizeGrid,ysizeGrid,xsizeCanvas,ysizeCanvas) {
+        this.xsizeGrid = xsizeGrid;
+        this.ysizeGrid = ysizeGrid;
+        this.xsizeCanvas = xsizeCanvas;
+        this.ysizeCanvas = ysizeCanvas;
+
+        //Create an array for storing the grid squares
+        this.gridSquares = new Array(ysizeGrid);
+        for(var i=0;i<this.gridSquares.length;i++) {
+            this.gridSquares[i] = new Array(xsizeGrid);
+        }
+
+        //create the grid square objects and store it into this array
+        var Xinc = xsizeCanvas/xsizeGrid;
+        var Yinc = ysizeCanvas/ysizeGrid;
+
+        var topLeft = new Coordinate(0,0);
+
+        for(var i=0;i<this.gridSquares.length;i++) {
+            for(var j=0;j<this.gridSquares[i].length;j++) {
+                this.gridSquares[i][j] = new GridSquare(topLeft,new Coordinate(topLeft.x+Xinc,topLeft.y),new Coordinate(topLeft.x+Xinc,topLeft.y+Yinc),
+                                new Coordinate(topLeft.x,topLeft.y+Yinc));
+                var oldX = topLeft.x;
+                var oldY = topLeft.y;
+                topLeft = new Coordinate(oldX+Xinc,oldY);
+            }
+            var oldY = topLeft.y;
+            topLeft = new Coordinate(0,oldY+Yinc);
+        }
+    }
+}
+
+/**
+ * Class for handling each individual grid square on the grid
+ */
+class GridSquare {
+
+    /**
+     * Constructor for creating a new grid square 
+     * 
+     * @param {Coordinate} topLeft 
+     * @param {Coordinate} topRight 
+     * @param {Coordinate} bottomRight 
+     * @param {Coordinate} bottomLeft 
+     */
+    constructor(topLeft,topRight,bottomRight,bottomLeft) {
+        this.topLeft = topLeft;
+        this.topRight = topRight;
+        this.bottomRight = bottomRight;
+        this.bottomLeft = bottomLeft;
+    }
+
+    /**
+     * Get the percentage of the grid square that is taken by the given region.
+     * Returned is a floating point number inbetween 0 and 1.
+     * @param {Region} region 
+     */
+    getPercentage(region) {
+        var areaRegion = region.getAreaInGridSquare(this);
+
+        var height = this.bottomLeft.y - this.topLeft.y;
+        var width = this.bottomRight.x - this.bottomLeft.x;
+
+        var gridSquareArea = height*width;
+
+        return areaRegion/gridSquareArea;
+    }
+
+}
+
 
 //tests
 /*
@@ -303,9 +438,33 @@ svgLoad.collectMapData();
 
 console.log(svgLoad.map.regions.get(0).getArea());
 //svgLoad.drawMapToFile(path.join(__dirname + "/../public/images/map.png"));
+
+
+var grid = new Grid(10,10,700,700);
+var testRegion = new Region();
+testRegion.addCoordinate(new SVGCoordinate("M",0,20,false));
+testRegion.addCoordinate(new SVGCoordinate("L",20,20,false));
+testRegion.addCoordinate(new SVGCoordinate("L",20,0,false));
+testRegion.addCoordinate(new SVGCoordinate("L",0,0,true));
+
+
+//Print out the coordinates of each grid square
+
+for(var i=0;i<grid.gridSquares.length;i++) {
+    for(var j=0;j<grid.gridSquares[i].length;j++) {
+        console.log(grid.gridSquares[i][j]);
+    }
+    console.log("---------------------------");
+}
+
+
+console.log(testRegion.getAreaInGridSquare(grid.gridSquares[0][0]));
+console.log(grid.gridSquares[0][0].getPercentage(testRegion));
 */
 module.exports = { SVGLoader: SVGLoader,
                    SVGCoordinate: SVGCoordinate,
                    Coordinate: Coordinate,
                    Region: Region,
-                   Map: Map };
+                   Map: Map,
+                   Grid:Grid,
+                   GridSquare:GridSquare};
