@@ -125,6 +125,7 @@ class SVGLoader {
         for(var i=0;i<this.map.regions.length;i++) {
             context.beginPath();
             for(var j=0;j<this.map.regions[i].coordinates.length;j++) {
+
                 var coordinate = this.map.regions[i].coordinates[j];
                 if(coordinate.drawChar === 'M') {
                     context.moveTo(coordinate.x,coordinate.y);
@@ -141,6 +142,7 @@ class SVGLoader {
             }
         }
 
+        
         //Draw the grid
         //variables for scaling the grid number to the actual canvas coordinates
         var scaleX = this.map.xsize / xsize;
@@ -164,7 +166,7 @@ class SVGLoader {
             context.lineTo(this.map.xsize,i*scaleY);
             context.stroke();
         }
-
+        
         
         //Save the canvas onto an external png file
         var out = fs.createWriteStream(filePath);
@@ -299,7 +301,7 @@ class Region {
         gridArray[0][1] = [g.topRight.x,g.topRight.y];
         gridArray[0][2] = [g.bottomRight.x,g.bottomRight.y];
         gridArray[0][3] = [g.bottomLeft.x,g.bottomLeft.y];
-
+        
         //Now need to convert this intersection back to a region
         var intersectionFull = polygonClipping.intersection(regionArray, gridArray);
 

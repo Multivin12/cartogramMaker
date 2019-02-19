@@ -109,9 +109,11 @@ app.get("/makeCartogram",(req,res) => {
 
     var dataArray = data.split(",");
 
+
     //density array with the final element being the average density of the map
     //as the sea is required to be the average density
     var densityArray = new Array(areas.length+1);
+
 
     //Create a density array: Density is defined as the data value for a certain region / area of the region.
     var total = 0;
@@ -122,6 +124,7 @@ app.get("/makeCartogram",(req,res) => {
     var averageDensity = total / areas.length;
     densityArray[areas.length] = averageDensity;
 
+
     //now generate the grid
     var grid = new Grid(xsize,ysize,svgLoader.map.xsize,svgLoader.map.ysize);
     //This is the density grid to be passed into the algorithm
@@ -131,10 +134,10 @@ app.get("/makeCartogram",(req,res) => {
         for(var j=0;j<grid.gridSquares[i].length;j++) {
             //now for each grid square calculate a certain density
 
-            //Firstly calculate what regions are in the grid square
+            //Firstly calculate what regions are in the grid square, calculate thei density in that grid square and store it here
             var densityTotal = 0;
 
-            //Need to record wether any of the square is covered by the "sea"
+            //Need to record the percentage of a grid square that is covered by a grid square
             var percentTotal = 0;
 
             for(var k=0;k<svgLoader.map.regions.length;k++) {
@@ -153,7 +156,6 @@ app.get("/makeCartogram",(req,res) => {
             }
             densityGrid[i][j] = densityTotal;
         }
-
     }
 
     //get the new set of grid points from the Gastner-Newman algorithm
