@@ -161,7 +161,37 @@ app.get("/makeCartogram",(req,res) => {
 
     //use an interpreter to convert the region grid points onto the new grid
     var interp = new Interpreter(newGridPoints,xsize,ysize);
-    interp.interpData(9,9);
+
+    //go through the entire map and change the grid points
+    var regions = svgLoader.map.regions;
+
+    for(var i=0;i<regions.length;i++) {
+
+        var region = regions.get(i);
+
+        for(var j=0;j<region.coordinates.length;j++) {
+            var oldCoordinate = region.coordinates.get(j);
+
+            //have to convert it from an SVG Coordinate to a grid point coordinate
+            //i.e if grid is 10x10 with 700 pixel size, if SVG Coordinate = (350,350),
+            //then grid coordinate = (5,5);
+            var x = (oldCoordinate.x/svgLoader.map.xsize) * xsize;
+            var y = (oldCoordinate.y/svgLoader.map.ysize) * ysize;
+
+            var tup = interp.interpData(x,y);
+
+            //Now convert these back to SVG Coordinates in terms of pixels
+            x = (tup[0]*svgLoader.map.xsize)/xsize;
+            y = (tup[1]*svgLoader.map.ysize)/ysize;
+
+
+            var newCoordinate = new SVGCoordinate(oldCoordinate.drawChar,x,y,oldCoordinate.ZPresent);
+
+            region.coordinates[j] = newCoordinate;
+        }
+    }
+
+    svgLoader.drawMapToFile(xsize,ysize,path.join(__dirname + '/public/images/cartogram.png'));
 
     res.render(__dirname + '/views/displayCartogramWait.html');
 });

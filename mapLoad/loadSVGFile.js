@@ -334,7 +334,7 @@ class Region {
 class Map {
 
     /**
-     * Constructor that takes in an argument corresponding to the size of the map in pixels..
+     * Constructor that takes in an argument corresponding to the size of the map in pixels.
      */
     constructor(xsize,ysize) {
         this.regions = new ArrayList();
