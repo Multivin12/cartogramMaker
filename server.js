@@ -14,7 +14,6 @@ app.use(express.static(path.join(__dirname , '/public')));
 const {SVGLoader,SVGCoordinate,Coordinate,Region,Map,Grid,GridSquare} = require('./mapLoad/loadSVGFile.js');
 //fs is for handling accesses to the local file system
 const fs = require('fs');
-const EventEmitter = require('events');
 
 const DCT2 = require('./Algorithm/GastnerNewmann/DCT2.js');
 const gastnerNewmann = require('./Algorithm/GastnerNewmann/main.js');
@@ -25,8 +24,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 10;
-var ysize = 10;
+var xsize = 40;
+var ysize = 40;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -171,7 +170,7 @@ function calculateDensities() {
     //Create a density array: Density is defined as the data value for a certain region / area of the region.
     var total = 0;
     for(var i=0;i<areas.length;i++) {
-        densityArray[i] = parseInt(areas[i]/parseInt(dataArray[i]));
+        densityArray[i] = parseInt(parseInt(dataArray[i])/areas[i]);
         total += densityArray[i];
     }
     var averageDensity = total / areas.length;
