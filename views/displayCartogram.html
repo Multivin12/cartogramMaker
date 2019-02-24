@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Your Cartogram is being built!</title>
+        <link rel="stylesheet" type="text/css" href="/css/displayCartogram.css" >
+    </head>
+    <body>
+
+        <div id="main">
+                <header>
+                    <h1>The Cartogram was built successfully!!</h1>
+                    <h2>Would you like to download this file?</h2>
+                </header>
+    
+                <img id="mapFileImage" src="images/cartogram.png" alt="Image of Cartogram">
+    
+                <form action="downloadFile" method="GET" enctype="multipart/form-data">
+                    <input id="yesButton" type="submit" value="Download File">
+                </form>
+    
+                <form action="/" method="GET" enctype="multipart/form-data">
+                    <input id="noButton" type="submit" value="Go to Homepage">
+                </form>
+    
+            </div>
+    </body>
+</html>

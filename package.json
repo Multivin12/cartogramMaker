@@ -5,10 +5,11 @@
   "main": "server.js",
   "dependencies": {
     "arraylist": "^0.1.0",
-    "async": "^2.6.1",
+    "async": "^2.6.2",
     "canvas": "^2.0.1",
     "canvas-prebuilt": "^2.0.0-alpha.14",
     "canvass": "^0.1.0",
+    "events": "^3.0.0",
     "expres": "^0.0.5",
     "express": "^4.16.4",
     "fft-js": "^0.0.11",

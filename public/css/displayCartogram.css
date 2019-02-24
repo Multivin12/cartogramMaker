@@ -1,0 +1,48 @@
+body {
+    margin:0;
+    padding:0;
+    width:100%;
+}
+html {
+    height:100%;
+    width:100%;
+}
+body{
+    height:100%;
+    font-family:'Verdana';
+    background-color: #57d06c;
+    text-align: center;
+    align-content: center;
+    display:inline-block;
+}
+header{
+    background-color:white;
+    color:green;
+    position:relative;
+    top:-1.5em;
+    height:100px;
+}
+header h1{
+    position:relative;
+    top:10%;
+}
+header h2{
+    position:relative;
+    top:0%;
+}
+#yesButton{
+    position:relative;
+    font-size: 20px;
+    height:3em;
+    right:10%;
+    width:12em;
+    top:2em;
+}
+#noButton{
+    position:relative;
+    font-size: 20px;
+    bottom:1em;
+    left:10%;
+    height:3em;
+    width:12em;
+}

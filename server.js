@@ -12,10 +12,15 @@ nunjucks.configure('views', { autoescape: true, express: app });
 app.use(express.static(path.join(__dirname , '/public')));
 //Classes for handling map files
 const {SVGLoader,SVGCoordinate,Coordinate,Region,Map,Grid,GridSquare} = require('./mapLoad/loadSVGFile.js');
+//fs is for handling accesses to the local file system
 const fs = require('fs');
+const EventEmitter = require('events');
+
 const DCT2 = require('./Algorithm/GastnerNewmann/DCT2.js');
 const gastnerNewmann = require('./Algorithm/GastnerNewmann/main.js');
 const Interpreter = require('./Algorithm/GastnerNewmann/interp.js');
+//variable for handling the SVG and storing all the map data
+var svgLoader = new SVGLoader();
 
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
@@ -70,11 +75,10 @@ app.post('/fileUpload',(req,res) =>{
 
         if(success) {
             
-            var svgLoader = new SVGLoader();
             svgLoader.readSVGFile("/../uploads/mapFile.svg");
             svgLoader.collectMapData();
             //xsize and ysize passed for drawing the grid just tp get a visualization
-            svgLoader.drawMapToFile(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
+            svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
             
             res.render(__dirname + '/views/displayMapFile.html');
         } else {
@@ -88,14 +92,63 @@ app.post('/fileUpload',(req,res) =>{
     });
 });
 
-//Method for generating the cartogram
-app.get("/makeCartogram",(req,res) => {
+//Method for handling the file download
+app.get("/downloadFile",(req,res) => {
+    var file = path.join(__dirname + '/cartogram.svg');
+    res.download(file,'cartogram.svg');
+});
 
-    //Collect the map data again from the map file
-    var svgLoader = new SVGLoader();
+//Method that is called for generating the cartogram
+app.get("/makeCartogram",(req,res) => {
+    buildCartogram();
+    res.render(__dirname + '/views/displayCartogram.html'); 
+});
+
+//Function that handles the cartogram generation
+function buildCartogram() {
+    //gather the data from the SVG file and store it into the SVG Loader
+    gatherData();
+    //calculate the densities of the map using the map and data file
+    var densityArray = calculateDensities();
+    //calculate the density grid with these values
+    var densityGrid = createDensityGrid(densityArray);
+    //get the new set of grid points from the Gastner-Newman algorithm
+    var newGridPoints = gastnerNewmann(densityGrid);
+    //use bilinear interpolation to update the map
+    //generate the png as a result.
+    updateCoordinates(newGridPoints);
+    //Method for building the SVG File of the cartogram
+    createSVGFile();
+}
+
+function createSVGFile() {
+    svgLoader.drawMapToSVG(path.join(__dirname + "/cartogramFile.svg"));
+}
+
+
+
+
+
+/********************************************************************************************************************/
+
+//All the cartogram methods.
+
+/********************************************************************************************************************/
+
+
+
+
+
+//function for handling the data gathering from the SVG file
+function gatherData() {
     svgLoader.readSVGFile("/../uploads/mapFile.svg");
     svgLoader.collectMapData();
+}
 
+//function to calculate the densities for all regions
+//returns the density array for every region with the last element
+//equalling the mean density of the entire map.
+function calculateDensities() {
     //An array for storing the areas of every region in the map
     var areas = new Array(svgLoader.map.regions.length);
 
@@ -124,7 +177,14 @@ app.get("/makeCartogram",(req,res) => {
     var averageDensity = total / areas.length;
     densityArray[areas.length] = averageDensity;
 
+    return densityArray;
+}
 
+/*
+ * Method for calculating the density grid given the density array.
+ * This is what is needed by the algorithm to generate the cartogram.
+*/
+function createDensityGrid(densityArray) {
     //now generate the grid
     var grid = new Grid(xsize,ysize,svgLoader.map.xsize,svgLoader.map.ysize);
     //This is the density grid to be passed into the algorithm
@@ -148,19 +208,20 @@ app.get("/makeCartogram",(req,res) => {
 
             if(percentTotal == 1) {
                 //just set the density as the density of the sea
-                densityTotal = densityArray[areas.length];
+                densityTotal = densityArray[densityArray.length-1];
             } else {
                 var seaPercent = 1-percentTotal;
 
-                densityTotal += seaPercent*densityArray[areas.length];
+                densityTotal += seaPercent*densityArray[densityArray.length-1];
             }
             densityGrid[i][j] = densityTotal;
         }
     }
+    return densityGrid;
+}
 
-    //get the new set of grid points from the Gastner-Newman algorithm
-    var newGridPoints = gastnerNewmann(densityGrid);
-
+// Method to update the region coordinates with the newly generated grid points
+function updateCoordinates(newGridPoints) {
     //use an interpreter to convert the region grid points onto the new grid
     var interp = new Interpreter(newGridPoints,xsize,ysize);
 
@@ -192,11 +253,8 @@ app.get("/makeCartogram",(req,res) => {
             region.coordinates[j] = newCoordinate;
         }
     }
-
-    svgLoader.drawMapToFile(xsize,ysize,path.join(__dirname + '/public/images/cartogram.png'));
-
-    res.render(__dirname + '/views/displayCartogramWait.html');
-});
+    svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/cartogram.png'));
+}
 
 app.listen(3000);
 

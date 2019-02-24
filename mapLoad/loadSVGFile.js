@@ -102,7 +102,7 @@ class SVGLoader {
      * Method for drawing the map onto a png file which can then be loaded into
      * by the html. 
     */
-    drawMapToFile(xsize,ysize,filePath) {
+    drawMapToPNG(xsize,ysize,filePath) {
 
         const canvas = createCanvas(parseInt(this.map.xsize),parseInt(this.map.ysize));
         const context = canvas.getContext('2d');
@@ -145,6 +145,7 @@ class SVGLoader {
         
         //Draw the grid
         //variables for scaling the grid number to the actual canvas coordinates
+        /*
         var scaleX = this.map.xsize / xsize;
         var scaleY = this.map.ysize / ysize;
 
@@ -166,7 +167,7 @@ class SVGLoader {
             context.lineTo(this.map.xsize,i*scaleY);
             context.stroke();
         }
-        
+        */
         
         //Save the canvas onto an external png file
         var out = fs.createWriteStream(filePath);
@@ -175,6 +176,42 @@ class SVGLoader {
         stream.on('data', function(chunk){out.write(chunk); });
 
         stream.on('end', function(){console.log('saved png'); });
+    }
+
+    drawMapToSVG(filePath) {
+        var svg = '';
+        svg += '<!DOCTYPE svg>\n'
+        //The extra bits after the svg version are all styling links
+        svg += '<svg width="' + this.map.xsize + 'px" height="' + this.map.ysize + 'px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n';
+
+        var regions = this.map.regions;
+        for(var i=0;i<regions.length;i++) {
+            var path = '';
+            var region = regions.get(i);
+            svg += '<path fill="#CEE3F5" stroke="#6E6E6E" stroke-width="0.4" d="'
+            for(var j=0;j<region.coordinates.length;j++) {
+                var coordinate = region.coordinates.get(j);
+                if(coordinate.drawChar === 'M') {
+                    svg += 'M' + coordinate.x + ',' + coordinate.y + ' ';
+                } else {
+                    svg += 'L' + coordinate.x + ',' + coordinate.y + ' ';
+                }
+                if(coordinate.ZPresent) {
+                    svg += 'Z';
+                }
+                
+            }
+            svg += '">\n';
+            svg += '</path>\n';
+        }
+        svg += '</svg>\n';
+
+        fs.writeFile("cartogram.svg", svg, function(err) {
+            if(err) {
+                console.log(err);
+            }
+        
+        }); 
     }
 }
 
