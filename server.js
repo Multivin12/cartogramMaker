@@ -24,8 +24,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 40;
-var ysize = 40;
+var xsize = 50;
+var ysize = 50;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -111,6 +111,7 @@ function buildCartogram() {
     var densityArray = calculateDensities();
     //calculate the density grid with these values
     var densityGrid = createDensityGrid(densityArray);
+    console.log(densityGrid);
     //get the new set of grid points from the Gastner-Newman algorithm
     var newGridPoints = gastnerNewmann(densityGrid);
     //use bilinear interpolation to update the map
@@ -167,10 +168,10 @@ function calculateDensities() {
     var densityArray = new Array(areas.length+1);
 
 
-    //Create a density array: Density is defined as the data value for a certain region / area of the region.
+    //Create a density array: Density is defined as the data value for a certain region divided by it's original area.
     var total = 0;
     for(var i=0;i<areas.length;i++) {
-        densityArray[i] = parseInt(parseInt(dataArray[i])/areas[i]);
+        densityArray[i] = parseFloat(parseFloat(dataArray[i]/areas[i]));
         total += densityArray[i];
     }
     var averageDensity = total / areas.length;
@@ -193,7 +194,7 @@ function createDensityGrid(densityArray) {
         for(var j=0;j<grid.gridSquares[i].length;j++) {
             //now for each grid square calculate a certain density
 
-            //Firstly calculate what regions are in the grid square, calculate thei density in that grid square and store it here
+            //Firstly calculate what regions are in the grid square, calculate their density in that grid square and store it here
             var densityTotal = 0;
 
             //Need to record the percentage of a grid square that is covered by a grid square
@@ -205,15 +206,14 @@ function createDensityGrid(densityArray) {
                 densityTotal += curPercentTotal*densityArray[k];
             }
 
-            if(percentTotal == 1) {
-                //just set the density as the density of the sea
-                densityTotal = densityArray[densityArray.length-1];
-            } else {
-                var seaPercent = 1-percentTotal;
+            //to add in the sea part of a grid square
+            densityTotal += (1-percentTotal)*densityArray[densityArray.length-1];
 
-                densityTotal += seaPercent*densityArray[densityArray.length-1];
-            }
-            densityGrid[i][j] = densityTotal;
+            
+            //TODO: Make sure that every data point in the density grid is greater than 1.
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            densityGrid[i][j] = densityTotal*10000000;
+            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         }
     }
     return densityGrid;

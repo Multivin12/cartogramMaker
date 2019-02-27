@@ -64,6 +64,7 @@ class GastnerNewmann {
      * cartogram. Inputs are of type 1D array, 1D array, int, int, int, double.
      */
     cart_makecart(pointx, pointy, npoints, xsize, ysize, blur) {
+        
         var s,t,h,desiredratio = null;
         this.drp = 9999999999999999;
         this.errorp = null;
@@ -411,7 +412,8 @@ class GastnerNewmann {
         iy = Math.round(iy);
 
         var vxp = w11*this.vxt[s][ix][iy] + w21*this.vxt[s][ix+1][iy] +
-                  w12*this.vxt[s][ix][iy+1] + w22*this.vxt[s][ix+1][iy+1];
+                w12*this.vxt[s][ix][iy+1] + w22*this.vxt[s][ix+1][iy+1];
+        
 
         var vyp = w11*this.vyt[s][ix][iy] + w21*this.vyt[s][ix+1][iy] +
                   w12*this.vyt[s][ix][iy+1] + w22*this.vyt[s][ix+1][iy+1];
