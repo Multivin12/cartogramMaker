@@ -77,7 +77,7 @@ function main(densityGrid) {
     obj.cart_makews(xsize,ysize);
     
     obj.cart_transform(inputData);
-    
+
     var temp = creategrid(xsize,ysize);
     var gridx = temp[0];
     var gridy = temp[1];
