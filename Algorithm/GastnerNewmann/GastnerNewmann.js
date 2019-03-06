@@ -72,7 +72,7 @@ class GastnerNewmann {
         //calculate initial density and velocity for snapshot zero
         this.cart_density(0.0,0,xsize,ysize);
         
-        this.cart_vgrid(0,xsize,ysize);
+        this.cart_vgrid(0,xsize,ysize);   
         s = 0;
         
         /* Now integrate the points in the polygons */
@@ -80,8 +80,8 @@ class GastnerNewmann {
         t = 0.5*blur*blur;
         h = INITH;
 
-        while(this.drp>0) {
 
+        while(this.drp>0) {
             /* Do a combined triple integration step */
 
             //error,dr and sp both need to be passed by reference which is not possible in node.js unless
@@ -132,7 +132,6 @@ class GastnerNewmann {
 
         var temp = DCT2.performiDCT2(this.fftexpt);
         this.rhot[s] = temp;
-        
     }
 
     /** Function to calulate the velocity at all integer grid points for a 
@@ -147,6 +146,7 @@ class GastnerNewmann {
         this.vxt[s][0][ysize] = this.vyt[s][0][ysize] = 0.0;
         this.vxt[s][xsize][ysize] = this.vyt[s][xsize][ysize] = 0.0;
 
+
         /* Do the top border */
 
         r11 = this.rhot[s][0][0];
@@ -156,6 +156,8 @@ class GastnerNewmann {
             this.vxt[s][ix][0] = -2*(r11-r01)/(r11+r01);
             this.vyt[s][ix][0] = 0.0;
         }
+
+        
 
         /* Do the bottom border */
 
@@ -185,7 +187,6 @@ class GastnerNewmann {
             this.vxt[s][xsize][iy] = 0.0;
             this.vyt[s][xsize][iy] = -2*(r01-r00)/(r01+r00);
         }
-
         /* Now do all the points in the middle */
 
         for(ix=1;ix<xsize;ix++) {
@@ -201,6 +202,7 @@ class GastnerNewmann {
                 this.vyt[s][ix][iy] = -2*(r01-r00+r11-r10)/mid;
             }
         }
+        
     }
 
     /**
@@ -250,13 +252,10 @@ class GastnerNewmann {
         this.cart_density(t+1.5*h,s3,xsize,ysize);
         this.cart_density(t+2.0*h,s4,xsize,ysize);
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
         this.cart_vgrid(s1,xsize,ysize);
         this.cart_vgrid(s2,xsize,ysize);
         this.cart_vgrid(s3,xsize,ysize);
         this.cart_vgrid(s4,xsize,ysize);
-
-        
         
         esqmax = drsqmax = 0;
 
@@ -413,11 +412,9 @@ class GastnerNewmann {
 
         var vxp = w11*this.vxt[s][ix][iy] + w21*this.vxt[s][ix+1][iy] +
                 w12*this.vxt[s][ix][iy+1] + w22*this.vxt[s][ix+1][iy+1];
-        
 
         var vyp = w11*this.vyt[s][ix][iy] + w21*this.vyt[s][ix+1][iy] +
-                  w12*this.vyt[s][ix][iy+1] + w22*this.vyt[s][ix+1][iy+1];
-
+                w12*this.vyt[s][ix][iy+1] + w22*this.vyt[s][ix+1][iy+1];
 
         return [vxp,vyp];
     }

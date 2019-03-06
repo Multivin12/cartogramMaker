@@ -454,7 +454,6 @@ class GastnerNewmann {
     }
 }
 
-
 function creategrid(xsize,ysize) {
     var gridx = DCT2.initializeArray((xsize+1)*(ysize+1));
     var gridy = DCT2.initializeArray((xsize+1)*(ysize+1));
@@ -470,9 +469,11 @@ function creategrid(xsize,ysize) {
     return [gridx,gridy];
 }
 
-var commandLineArguments = process.argv;
 
-console.log(commandLineArguments);
+var commandLineArguments = process.argv;
+//index = 1 is the xsize
+//index = 2 is the ysize 
+//index = 3 is the type of data to be fed into 
 
 //timing experiment
 var xsize = 50;
@@ -480,11 +481,14 @@ var ysize = 50;
 var inputTestData = DCT2.initialize2DArray(xsize,ysize);
 
 //assign the test data
-for (var i=0;i<xsize;i++) {
-    for (var j=0;j<ysize;j++) {
-        inputTestData[i][j] = 1;
+function homogenousData(xsize,ysize) {
+    for (var i=0;i<xsize;i++) {
+        for (var j=0;j<ysize;j++) {
+            inputTestData[i][j] = 1;
+        }
     }
 }
+
 
 //console.log(inputTestData);
 var test = new GastnerNewmann();

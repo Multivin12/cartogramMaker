@@ -111,7 +111,6 @@ function buildCartogram() {
     var densityArray = calculateDensities();
     //calculate the density grid with these values
     var densityGrid = createDensityGrid(densityArray);
-    console.log(densityGrid);
     //get the new set of grid points from the Gastner-Newman algorithm
     var newGridPoints = gastnerNewmann(densityGrid);
     //use bilinear interpolation to update the map
@@ -190,6 +189,7 @@ function createDensityGrid(densityArray) {
     //This is the density grid to be passed into the algorithm
     var densityGrid = DCT2.initialize2DArray(xsize,ysize);
 
+
     for(var i=0;i<grid.gridSquares.length;i++) {
         for(var j=0;j<grid.gridSquares[i].length;j++) {
             //now for each grid square calculate a certain density
@@ -197,22 +197,23 @@ function createDensityGrid(densityArray) {
             //Firstly calculate what regions are in the grid square, calculate their density in that grid square and store it here
             var densityTotal = 0;
 
-            //Need to record the percentage of a grid square that is covered by a grid square
+            //Need to record the percentage of a grid square that is covered by land
             var percentTotal = 0;
 
             for(var k=0;k<svgLoader.map.regions.length;k++) {
+                
                 var curPercentTotal = grid.gridSquares[i][j].getPercentage(svgLoader.map.regions.get(k));
                 percentTotal += curPercentTotal;
                 densityTotal += curPercentTotal*densityArray[k];
             }
 
+
             //to add in the sea part of a grid square
             densityTotal += (1-percentTotal)*densityArray[densityArray.length-1];
-
             
             //TODO: Make sure that every data point in the density grid is greater than 1.
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            densityGrid[i][j] = densityTotal*10000000;
+            densityGrid[i][j] = densityTotal*1.0e200;
             /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         }
     }
@@ -251,6 +252,7 @@ function updateCoordinates(newGridPoints) {
 
             region.coordinates[j] = newCoordinate;
         }
+        console.log(region.getArea());
     }
     svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/cartogram.png'));
 }

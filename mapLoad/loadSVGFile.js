@@ -3,6 +3,7 @@
  * and storing the regions and coordinates in appropriate objects.
  */
 const ArrayList = require('arraylist');
+const DCT2 = require('../Algorithm/GastnerNewmann/DCT2.js');
 const path = require('path');
 //This module is for converting the svg file to a JSON format.
 const xml2js = require('xml2js');
@@ -66,6 +67,7 @@ class SVGLoader {
 
         //Collect the coordinates of all the regions in the map file
         var arrayOfRegions = this.JSONData.svg.g[0].path;
+        
         for(var i=0;i<arrayOfRegions.length;i++) {
             //get the element corresonding to the coordinates of the region
             var coordinateString = arrayOfRegions[i]["$"].d;
@@ -108,6 +110,7 @@ class SVGLoader {
         const context = canvas.getContext('2d');
 
         //Draw the rectangle with a blue background
+        
         context.beginPath();
         context.lineWidth = 3;
         context.rect(0,0,canvas.width,canvas.height);
@@ -115,7 +118,7 @@ class SVGLoader {
         context.fillStyle = 'rgb(35, 106, 169)';
         context.fill();
         context.stroke();
-
+        
         //Draw the SVG Data into the rectangle
         context.strokeStyle = 'rgb(0,0,0)';
         context.fillStyle = 'green';
@@ -308,10 +311,31 @@ class Region {
                 }
                 currentArea = Math.abs(currentArea);
                 currentArea = currentArea/2;
+                if(isNaN(currentArea)){
+                    continue;
+                }
                 totalArea += currentArea;
             }
         }
         return totalArea;
+    }
+
+    /**
+     * Method for getting all the sub regions within a certain region
+     * 
+     * @returns region[] representing the sub regions.
+     */
+    getSubRegions() {
+        var subRegions = new ArrayList();
+        var subRegion = new Region();
+        for(var i=0;i<this.coordinates.length;i++) {
+            subRegion.addCoordinate(this.coordinates.get(i));
+            if(this.coordinates.get(i).ZPresent) {
+                subRegions.add(subRegion);
+                subRegion = new Region();
+            }
+        }
+        return subRegions;
     }
 
     /**
@@ -323,47 +347,60 @@ class Region {
      */
     getAreaInGridSquare(g) {
 
-        //firstly need to convert the region and grid square to an unconventional format
-        //that is used by the polygon clipping library.
-        var regionArray = [];
-        regionArray[0] = [this.coordinates.length];
-        for(var i=0;i<this.coordinates.length;i++) {
-            regionArray[0][i] = [this.coordinates.get(i).x,this.coordinates.get(i).y];
-        }
+        var subRegions = this.getSubRegions();
+        var totArea = 0;
 
-        //and then the same for the gridSquare
-        var gridArray = [];
-        gridArray[0] = [4];
-        gridArray[0][0] = [g.topLeft.x,g.topLeft.y];
-        gridArray[0][1] = [g.topRight.x,g.topRight.y];
-        gridArray[0][2] = [g.bottomRight.x,g.bottomRight.y];
-        gridArray[0][3] = [g.bottomLeft.x,g.bottomLeft.y];
-        
-        //Now need to convert this intersection back to a region
-        var intersectionFull = polygonClipping.intersection(regionArray, gridArray);
+        for(var i=0;i<subRegions.length;i++) {
+            var subRegion = subRegions[i];
+            var regionArray = [];
+            regionArray[0] = [[]];
 
-        //Meaning there is no intersection
-        if(intersectionFull.length === 0) {
-            return 0;
-        }
-
-        var intersection = intersectionFull[0][0];
-
-        var newRegion = new Region();
-
-        //Only to the penultimate coordinate as it repeats the first coordinate again at the end
-        for(var i=0;i<intersection.length-1;i++) {
-            if(i ==0) {
-                var newCoordinate = new SVGCoordinate("M",intersection[i][0],intersection[i][1],false);
-            } else if (i == (intersection.length-2)) {
-                var newCoordinate = new SVGCoordinate("L",intersection[i][0],intersection[i][1],true);
-            } else {
-                var newCoordinate = new SVGCoordinate("L",intersection[i][0],intersection[i][1],false);
+            
+            //firstly need to convert the region and grid square to an unconventional format
+            //that is used by the polygon clipping library.
+            for(var j=0;j<subRegion.coordinates.length;j++) {
+                regionArray[0][j] = [subRegion.coordinates.get(j).x,subRegion.coordinates.get(j).y];
             }
-            newRegion.addCoordinate(newCoordinate);
-        }
 
-        return newRegion.getArea();
+            //and then the same for the gridSquare
+            var gridArray = [];
+            gridArray[0] = [4];
+            gridArray[0][0] = [g.topLeft.x,g.topLeft.y];
+            gridArray[0][1] = [g.topRight.x,g.topRight.y];
+            gridArray[0][2] = [g.bottomRight.x,g.bottomRight.y];
+            gridArray[0][3] = [g.bottomLeft.x,g.bottomLeft.y];
+            
+            //Now need to convert this intersection back to a region
+            var intersectionFull = polygonClipping.intersection(regionArray, gridArray);
+
+
+
+            if(intersectionFull.length !== 0) {
+
+                var intersection = intersectionFull[0][0];
+
+                var newRegion = new Region();
+
+
+                //Only to the penultimate coordinate as it repeats the first coordinate again at the end
+                for(var k=0;k<intersection.length-1;k++) {
+                    if(k ==0) {
+                        var newCoordinate = new SVGCoordinate("M",intersection[k][0],intersection[k][1],false);
+                    } else if (k == (intersection.length-2)) {
+                        var newCoordinate = new SVGCoordinate("L",intersection[k][0],intersection[k][1],true);
+                    } else {
+                        var newCoordinate = new SVGCoordinate("L",intersection[k][0],intersection[k][1],false);
+                    }
+                    newRegion.addCoordinate(newCoordinate);
+                }
+
+
+                totArea += newRegion.getArea();
+            } else {
+                totArea += 0.0;
+            }
+        }
+        return totArea;
     }
 }
 
@@ -471,34 +508,29 @@ class GridSquare {
 
 //tests
 /*
-var svgLoad = new SVGLoader();
-svgLoad.readSVGFile("/../SVGFiles/africa.svg");
-svgLoad.collectMapData();
+var xsize = 4;
+var ysize = 2;
+var svgLoader = new SVGLoader();
+svgLoader.readSVGFile("/../uploads/mapFile.svg");
+svgLoader.collectMapData();
+svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname, "/../public/images/map.png"));
 
-console.log(svgLoad.map.regions.get(0).getArea());
-//svgLoad.drawMapToFile(path.join(__dirname + "/../public/images/map.png"));
+//now generate the grid
+var grid = new Grid(xsize,ysize,svgLoader.map.xsize,svgLoader.map.ysize);
 
-
-var grid = new Grid(10,10,700,700);
-var testRegion = new Region();
-testRegion.addCoordinate(new SVGCoordinate("M",0,20,false));
-testRegion.addCoordinate(new SVGCoordinate("L",20,20,false));
-testRegion.addCoordinate(new SVGCoordinate("L",20,0,false));
-testRegion.addCoordinate(new SVGCoordinate("L",0,0,true));
-
-
-//Print out the coordinates of each grid square
 
 for(var i=0;i<grid.gridSquares.length;i++) {
     for(var j=0;j<grid.gridSquares[i].length;j++) {
-        console.log(grid.gridSquares[i][j]);
+
+        for(var k=0;k<svgLoader.map.regions.length;k++) {
+            
+            if(k==1) {
+                var curPercentTotal = grid.gridSquares[i][j].getPercentage(svgLoader.map.regions.get(k));
+                console.log(curPercentTotal);
+            }
+        }
     }
-    console.log("---------------------------");
 }
-
-
-console.log(testRegion.getAreaInGridSquare(grid.gridSquares[0][0]));
-console.log(grid.gridSquares[0][0].getPercentage(testRegion));
 */
 module.exports = { SVGLoader: SVGLoader,
                    SVGCoordinate: SVGCoordinate,
