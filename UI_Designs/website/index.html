@@ -7,8 +7,8 @@
 	<title> Homepage </title>
 	<link rel="stylesheet" href="CSS/header.css"  type="text/css">
 	<link rel="stylesheet" href="CSS/index.css"  type="text/css">
-	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/core.js"></script>
-	<script type="text/javascript" src="JS/home.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/core.js"></script>
+	<script src="JS/home.js"></script>
 	
 	<!-- Bootstrap imports -->
 	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -17,7 +17,7 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 </head>
 
-<body onload="init()">
+<body onload="init()" onresize="init()">
 
 	<div id="header" class="header">
 		<a href="#" class="logo">B-Cart</a>
@@ -30,9 +30,10 @@
 		</div>
 	</div>
 	
-	<div class="gallery">
-		<img id="galleryImage" src="images/FAQImage.png" alt="QuestionImage">
-	</div>
+	<div id="triangle-left"></div>
+	<div id="triangle-right"></div>
+
+	<div class="gallery" id="gallery"></div>
 	
 </body>
 </html>
