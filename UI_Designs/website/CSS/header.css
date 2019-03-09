@@ -45,9 +45,8 @@ html {
   position:relative;
   top:3px;
 }
-
-
 /* Add media queries for responsiveness - when the screen is 500px wide or less, stack the links on top of each other */ 
+
 @media screen and (max-width: 700px) {
   .header a {
     float: none;
