@@ -66,7 +66,7 @@ class SVGLoader {
         this.map = new Map(parseInt(heightNumber),parseInt(widthNumber));
 
         //Collect the coordinates of all the regions in the map file
-        var arrayOfRegions = this.JSONData.svg.g[0].path;
+        var arrayOfRegions = this.JSONData.svg.path;
         
         for(var i=0;i<arrayOfRegions.length;i++) {
             //get the element corresonding to the coordinates of the region

@@ -1,0 +1,61 @@
+body,
+html {
+  height: 100%;
+  min-height:100%;
+  width: 100%;
+  margin: 0;
+}
+#bold{
+    font-weight:bold;
+}
+#navigator {
+    position: absolute;
+    font-size:25px;
+    top:100px;
+    left:30%;
+    right:30%;
+    width:60%;
+}
+#navigator a{
+    text-decoration: none;
+}
+/*Simulation buttons*/
+#success{
+    position: relative;
+}
+#failure{
+    position: relative;
+    top:50px;
+    left:-240px;
+}
+/*Progress bar section*/
+.btn.btn-success{
+    position:absolute;
+    top:52%;
+    left:20%;
+    font-size:30px;
+}
+.btn.btn-primary {
+    position:absolute;
+    top:52%;
+    left:65%;
+}
+.progress{
+    position:absolute;
+    top:45%;
+    left:20%;
+    width:50%;
+    height:30px !important;
+}
+#Info{
+    position: absolute;
+    left:20%;
+    top:35%;
+    font-size:20px;
+}
+#Error{
+    position: absolute;
+    left:20%;
+    top:40%;
+    font-size:20px;
+}

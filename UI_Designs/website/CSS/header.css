@@ -8,6 +8,8 @@ html {
   overflow: hidden;
   background-color: #262626;
   padding: 20px 10px;
+  position:relative;
+  z-index:8;
 }
 
 /* Style the header links */

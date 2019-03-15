@@ -1,11 +1,15 @@
-function init() {
+function init(status) {
 
 	var windowHeight = $(window).height();
 	var newHeight = windowHeight - $("#header").height()-40;
 
 	$("#gallery img.opaque").attr("style","position:absolute;z-index:-5;left:0%;bottom:0%;width:100%;height:" + newHeight + "px;");
 
-	addHTML(0);
+	//This is only ran when the html is firstly loaded, status 0 means the screen has been resized, status 1 means it's been loaded
+	if(status === 1) {
+		addHTML(0);
+	}
+	
 	//For the selector buttons at the bottom
 	$(document).ready(function() {
 		$("#gallery_controls").on('click', 'button', function() {
@@ -98,17 +102,67 @@ function translatePictureRight() {
  * @param  element 
  */
 function addHTML(imgIndex) {
+	
+	//picInfo is the div containing the buttons and text to be projected onto the image
+	$("#picInfo").remove();
+	$("body").append($("<div/>").attr("id","picInfo"));
+	
+	var p = $("<p/>");
+	var h1 = $("<h1/>");
+	var a = $("<a/>");
+
 	switch(imgIndex) {
 		case 0:
-			$("body").append($("<button/>").attr("style","position:absolute;z-index:5;").append("0"));
+			$("#picInfo").append(h1);
+			$("#picInfo h1").append("B-Cart: Online Cartogram Maker.");
+
+			$("#picInfo").append(p);
+			$("#picInfo p").append("Build Cartograms now just by clicking here.");
+
+			$("#picInfo").append(a);
+			$("#picInfo a").attr("href","buildCart.html");
+
+			$("#picInfo a").append($("<button/>").attr("style","position:absolute;z-index:5;").append("Build Cartogram"));
+			$("#picInfo button").attr("class","btn btn-primary");
 			break;
 		case 1:
-			$("body").append($("<button/>").attr("style","position:absolute;z-index:5;").append("1"));
+			$("#picInfo").append(h1);
+			$("#picInfo h1").append("Not sure where to start?");
+
+			$("#picInfo").append(p);
+			$("#picInfo p").append("Click here to read over the instructions.");
+
+			$("#picInfo").append(a);
+			$("#picInfo a").attr("href","instructions.html");
+
+			$("#picInfo a").append($("<button/>").attr("style","position:absolute;z-index:5;").append("Instructions"));
+			$("#picInfo button").attr("class","btn btn-primary");
 			break;
 		case 2:
-			$("body").append($("<button/>").attr("style","position:absolute;z-index:5;").append("2"));
+			$("#picInfo").append(h1);
+			$("#picInfo h1").append("What are cartograms?");
+
+			$("#picInfo").append(p);
+			$("#picInfo p").append("They are maps where regions are scalled according to a given statistic.");
+
+			$("#picInfo").append(a);
+			$("#picInfo a").attr("href","uses.html");
+
+			$("#picInfo a").append($("<button/>").attr("style","position:absolute;z-index:5;").append("Use of Cartograms"));
+			$("#picInfo button").attr("class","btn btn-primary");
+			$("#picInfo button").attr("id","cartogramUse");
 			break;
 		default:
-			$("body").append($("<button/>").attr("style","position:absolute;z-index:5;").append("3"));
+			$("#picInfo").append(h1);
+			$("#picInfo h1").append("Still have questions?");
+
+			$("#picInfo").append(p);
+			$("#picInfo p").append("Visit our FAQ page.");
+
+			$("#picInfo").append(a);
+			$("#picInfo a").attr("href","faq.html");
+
+			$("#picInfo a").append($("<button/>").attr("style","position:absolute;z-index:5;").append("FAQ"));
+			$("#picInfo button").attr("class","btn btn-primary");
 	}
 }

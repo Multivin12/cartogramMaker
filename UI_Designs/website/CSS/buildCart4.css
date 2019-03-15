@@ -1,0 +1,61 @@
+body,
+html {
+  height: 100%;
+  min-height:100%;
+  width: 100%;
+  margin: 0;
+}
+#bold{
+    font-weight:bold;
+}
+#navigator {
+    position: absolute;
+    font-size:25px;
+    top:100px;
+    left:30%;
+    right:30%;
+    width:60%;
+}
+#navigator a{
+    text-decoration: none;
+}
+/*Main section i.e not the header or the nav bar*/
+#cartButton{
+    position:absolute;
+    top:90%;
+    left:52%;
+}
+#mapButton{
+    position:absolute;
+    top:90%;
+    left:27%;
+}
+h1{
+    position:absolute;
+    top:25%;
+    left:20%;
+}
+#mapTitle{
+    position: absolute;
+    top:35%;
+    left:30%;
+}
+#cartogramTitle{
+    position: absolute;
+    top:35%;
+    left:55%;
+}
+#map{
+    position:absolute;
+    left:23%;
+    top:40%;
+    height:300px;
+    width:300px;
+}
+#cartogram{
+    position:absolute;
+    left:48%;
+    top:40%;
+    height:300px;
+    width:300px;
+}
