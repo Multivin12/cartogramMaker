@@ -141,8 +141,8 @@ class GastnerNewmann {
         var ix,iy,r00,r10,r01,r11,mid = null;
 
         /* Do the corners */
-        this.vxt[s][0][0] = this.vyt[s][0][0] = 0;
-        this.vxt[s][xsize][0] = this.vyt[s][xsize][0] = 0;
+        this.vxt[s][0][0] = this.vyt[s][0][0] = 0.0;
+        this.vxt[s][xsize][0] = this.vyt[s][xsize][0] = 0.0;
         this.vxt[s][0][ysize] = this.vyt[s][0][ysize] = 0.0;
         this.vxt[s][xsize][ysize] = this.vyt[s][xsize][ysize] = 0.0;
 
@@ -156,8 +156,6 @@ class GastnerNewmann {
             this.vxt[s][ix][0] = -2*(r11-r01)/(r11+r01);
             this.vyt[s][ix][0] = 0.0;
         }
-
-        
 
         /* Do the bottom border */
 
@@ -178,6 +176,7 @@ class GastnerNewmann {
             this.vxt[s][0][iy] = 0.0;
             this.vyt[s][0][iy] = -2*(r11-r10)/(r11+r10);
         }
+        
 
         /* Do the right edge */
         r01 = this.rhot[s][(xsize-1)][0];
@@ -202,7 +201,6 @@ class GastnerNewmann {
                 this.vyt[s][ix][iy] = -2*(r01-r00+r11-r10)/mid;
             }
         }
-        
     }
 
     /**
@@ -246,12 +244,11 @@ class GastnerNewmann {
         s4 = (s+4)%5;
 
         //Slow part of program
-        /////////////////////////////////////////////////////////////////////////////////////////////////////////////
         this.cart_density(t+0.5*h,s1,xsize,ysize);
         this.cart_density(t+1.0*h,s2,xsize,ysize);
         this.cart_density(t+1.5*h,s3,xsize,ysize);
         this.cart_density(t+2.0*h,s4,xsize,ysize);
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         this.cart_vgrid(s1,xsize,ysize);
         this.cart_vgrid(s2,xsize,ysize);
         this.cart_vgrid(s3,xsize,ysize);
@@ -383,6 +380,7 @@ class GastnerNewmann {
         var ix,iy,dx,dy,dxlm,dylm,w11,w21,w12,w22;
 
         ix = rx;
+        ix = Math.round(ix);
         if(ix<0) {
             ix = 0;
         } else if(ix>=xsize) {
@@ -390,6 +388,7 @@ class GastnerNewmann {
         }
 
         iy = ry;
+        iy = Math.round(iy);
         if(iy<0) {
             iy=0;
         } else if(iy>=ysize) {
@@ -407,8 +406,6 @@ class GastnerNewmann {
         w12 = dxlm*dy;
         w22 = dx*dy;
 
-        ix = Math.round(ix);
-        iy = Math.round(iy);
 
         var vxp = w11*this.vxt[s][ix][iy] + w21*this.vxt[s][ix+1][iy] +
                 w12*this.vxt[s][ix][iy+1] + w22*this.vxt[s][ix+1][iy+1];

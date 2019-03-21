@@ -14,7 +14,9 @@ app.use(express.static(path.join(__dirname , '/public')));
 const {SVGLoader,SVGCoordinate,Coordinate,Region,Map,Grid,GridSquare} = require('./mapLoad/loadSVGFile.js');
 //fs is for handling accesses to the local file system
 const fs = require('fs');
+const HashMap = require('hashmap');
 
+//Classes for handling the gastner-newmann algorithm.
 const DCT2 = require('./Algorithm/GastnerNewmann/DCT2.js');
 const gastnerNewmann = require('./Algorithm/GastnerNewmann/main.js');
 const Interpreter = require('./Algorithm/GastnerNewmann/interp.js');
@@ -24,8 +26,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 50;
-var ysize = 50;
+var xsize = 20;
+var ysize = 20;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -108,9 +110,9 @@ function buildCartogram() {
     //gather the data from the SVG file and store it into the SVG Loader
     gatherData();
     //calculate the densities of the map using the map and data file
-    var densityArray = calculateDensities();
+    var densityHashMap = calculateDensities();
     //calculate the density grid with these values
-    var densityGrid = createDensityGrid(densityArray);
+    var densityGrid = createDensityGrid(densityHashMap);
     //get the new set of grid points from the Gastner-Newman algorithm
     var newGridPoints = gastnerNewmann(densityGrid);
     //use bilinear interpolation to update the map
@@ -159,41 +161,53 @@ function calculateDensities() {
     var dataBuffer = fs.readFileSync(path.join(__dirname + "/uploads/dataFile.csv"));
     var data = dataBuffer.toString();
 
-    var dataArray = data.split(",");
+    //to remove all newline characters in a string
+    var dataArray = data.split("\r\n");
 
+    //need to put all the data into a hashmap with key the Region name and population the value.
+    var dataInfo = new HashMap();
 
-    //density array with the final element being the average density of the map
-    //as the sea is required to be the average density
-    var densityArray = new Array(areas.length+1);
-
-
-    //Create a density array: Density is defined as the data value for a certain region divided by it's original area.
-    var total = 0;
-    for(var i=0;i<areas.length;i++) {
-        densityArray[i] = parseFloat(parseFloat(dataArray[i]/areas[i]));
-        total += densityArray[i];
+    for(var i=0;i<dataArray.length;i++) {
+        var line = dataArray[i].split(",");
+        dataInfo.set(line[0],parseFloat(line[1]));
     }
-    var averageDensity = total / areas.length;
-    densityArray[areas.length] = averageDensity;
 
-    return densityArray;
+    //Now need to change the value stored in the hashmap to be the density for that region.
+
+    //Density is defined as the data value for a certain region divided by it's original area.
+    var totalDensityValue = 0;
+    for(var i=0;i<svgLoader.map.regions.length;i++) {
+        var region = svgLoader.map.regions.get(i);
+        var popValue = dataInfo.get(region.name);
+
+        var densityValue = popValue/region.getArea();
+
+        dataInfo.set(region.name,densityValue);
+
+        totalDensityValue += densityValue;
+    }
+
+    var meanDensityValue = totalDensityValue/svgLoader.map.regions.length;
+
+    dataInfo.set("Sea",meanDensityValue);
+
+    return dataInfo;
 }
 
 /*
  * Method for calculating the density grid given the density array.
  * This is what is needed by the algorithm to generate the cartogram.
 */
-function createDensityGrid(densityArray) {
+function createDensityGrid(densityHashMap) {
     //now generate the grid
     var grid = new Grid(xsize,ysize,svgLoader.map.xsize,svgLoader.map.ysize);
     //This is the density grid to be passed into the algorithm
     var densityGrid = DCT2.initialize2DArray(xsize,ysize);
-
+    
 
     for(var i=0;i<grid.gridSquares.length;i++) {
         for(var j=0;j<grid.gridSquares[i].length;j++) {
             //now for each grid square calculate a certain density
-
             //Firstly calculate what regions are in the grid square, calculate their density in that grid square and store it here
             var densityTotal = 0;
 
@@ -204,19 +218,21 @@ function createDensityGrid(densityArray) {
                 
                 var curPercentTotal = grid.gridSquares[i][j].getPercentage(svgLoader.map.regions.get(k));
                 percentTotal += curPercentTotal;
-                densityTotal += curPercentTotal*densityArray[k];
+                densityTotal += curPercentTotal*densityHashMap.get(svgLoader.map.regions.get(k).name);
             }
 
-
             //to add in the sea part of a grid square
-            densityTotal += (1-percentTotal)*densityArray[densityArray.length-1];
             
-            //TODO: Make sure that every data point in the density grid is greater than 1.
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            densityGrid[i][j] = densityTotal*1.0e200;
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+            if(percentTotal ===0) {
+                densityGrid[i][j] = densityHashMap.get("Sea");
+            } else {
+                densityGrid[i][j] = densityTotal;
+            }
+
+            //densityGrid [i][j] += (1-percentTotal)*densityHashMap.get("Sea");
         }
     }
+    console.log(densityGrid);
     return densityGrid;
 }
 
@@ -252,7 +268,7 @@ function updateCoordinates(newGridPoints) {
 
             region.coordinates[j] = newCoordinate;
         }
-        console.log(region.getArea());
+        //console.log(region.getArea());
     }
     svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/cartogram.png'));
 }

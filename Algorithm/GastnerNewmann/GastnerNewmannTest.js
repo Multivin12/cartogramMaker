@@ -415,6 +415,7 @@ class GastnerNewmann {
         var ix,iy,dx,dy,dxlm,dylm,w11,w21,w12,w22;
 
         ix = rx;
+        ix = Math.round(ix);
         if(ix<0) {
             ix = 0;
         } else if(ix>=xsize) {
@@ -422,6 +423,7 @@ class GastnerNewmann {
         }
 
         iy = ry;
+        iy = Math.round(iy);
         if(iy<0) {
             iy=0;
         } else if(iy>=ysize) {
@@ -439,16 +441,12 @@ class GastnerNewmann {
         w12 = dxlm*dy;
         w22 = dx*dy;
 
-        ix = Math.round(ix);
-        iy = Math.round(iy);
 
         var vxp = w11*this.vxt[s][ix][iy] + w21*this.vxt[s][ix+1][iy] +
                 w12*this.vxt[s][ix][iy+1] + w22*this.vxt[s][ix+1][iy+1];
-        
 
         var vyp = w11*this.vyt[s][ix][iy] + w21*this.vyt[s][ix+1][iy] +
-                  w12*this.vyt[s][ix][iy+1] + w22*this.vyt[s][ix+1][iy+1];
-
+                w12*this.vyt[s][ix][iy+1] + w22*this.vyt[s][ix+1][iy+1];
 
         return [vxp,vyp];
     }
@@ -476,17 +474,32 @@ var commandLineArguments = process.argv;
 //index = 3 is the type of data to be fed into 
 
 //timing experiment
-var xsize = 50;
-var ysize = 50;
+var xsize = parseInt(commandLineArguments[2]);
+var ysize = parseInt(commandLineArguments[3]);
 var inputTestData = DCT2.initialize2DArray(xsize,ysize);
 
 //assign the test data
+//homogenous data
 function homogenousData(xsize,ysize) {
     for (var i=0;i<xsize;i++) {
         for (var j=0;j<ysize;j++) {
-            inputTestData[i][j] = 1;
+            inputTestData[i][j] = 5;
         }
     }
+}
+
+//random data
+function randomData(xsize,ysize) {
+    for (var i=0;i<xsize;i++) {
+        for (var j=0;j<ysize;j++) {
+            inputTestData[i][j] = Math.random()*100;
+        }
+    }
+}
+
+//real-world data
+function realWorldData(xsize,ysize) {
+
 }
 
 
@@ -494,6 +507,15 @@ function homogenousData(xsize,ysize) {
 var test = new GastnerNewmann();
 //Do the various stages as stated in the documentation of cart.c
 test.cart_makews(xsize,ysize);
+
+//Assign the test data
+if(commandLineArguments[4] == 0) {
+    homogenousData(xsize,ysize);
+} else if (commandLineArguments[4] == 1) {
+    randomData(xsize,ysize);
+} else {
+    realWorldData(xsize,ysize);
+}
 
 var t1 = new Date().getTime();
 test.cart_transform(inputTestData,xsize,ysize);
@@ -505,9 +527,8 @@ var temp = creategrid(xsize,ysize);
 var gridx = temp[0];
 var gridy = temp[1];
 var tup = test.cart_makecart(gridx,gridy,(xsize+1)*(ysize+1),xsize,ysize,0);
+
+
+//output is of the form [initialTransform(DCT2),Preamble,densityTime,velocityTime,rebounds]
 console.log(data);
 console.log(data.length);
-
-
-
-module.exports = GastnerNewmann;

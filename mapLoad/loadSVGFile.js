@@ -3,6 +3,7 @@
  * and storing the regions and coordinates in appropriate objects.
  */
 const ArrayList = require('arraylist');
+const Queue = require('queue');
 const DCT2 = require('../Algorithm/GastnerNewmann/DCT2.js');
 const path = require('path');
 //This module is for converting the svg file to a JSON format.
@@ -36,7 +37,7 @@ class SVGLoader {
         parser.parseString(data, (err, result) => {
             if(err){
                 console.log(err);
-                throw new Error();
+                return;
             } else {
                 //Convert it into a JSON file
                 var JSONData = JSON.stringify(result,null,1);
@@ -46,6 +47,84 @@ class SVGLoader {
         });
 
         this.JSONData = json;
+        //preprocess the SVG to a set format
+        this.svgLoaderPreprocessor();
+    }
+
+    /**
+     * Method to convert any SVG to the format that the system requires.
+     * Read SVG File must be called before calling this method.
+     * NOTE: the path must contain only line segments as circle paths are not supported.
+     * 
+     */
+    svgLoaderPreprocessor() {
+
+        try{
+            var regions = this.JSONData.svg.path;
+        } catch(err) {
+            throw new Error("File Load Error: File Corrupted.");
+        }
+
+        if(typeof(regions) === "undefined") {
+            throw new Error("File Load Error: The next tag after svg should be the path tag for the first region.");
+        }
+
+        //This part is to find regions enclosed in <g> tags
+        //and add these to the set of regions to be loaded
+        var currentElement = this.JSONData.svg.g;
+        
+        //test if the document actually has any g tags
+        if(typeof(currentElement) !== "undefined") {
+            var listToEvaluate = new Queue();
+
+            for(var i=0;i<currentElement.length;i++) {
+                listToEvaluate.push(currentElement[i]);
+            }
+
+            
+            while(listToEvaluate.length !== 0) {
+                currentElement = listToEvaluate.pop();
+
+                //if this happens it's not a region element
+                if(typeof(currentElement.path) === "undefined") {
+                    
+                    var childElements = currentElement.g;
+
+                    for(var i=0;i<childElements.length;i++) {
+                        listToEvaluate.push(childElements[i]);
+                    }
+
+                } else {
+                    //else add it to the collection of regions
+                    var jsonToAdd = currentElement.path[0];
+                    var jsonToAddTo = this.JSONData.svg.path;
+                    
+                    jsonToAddTo.push(jsonToAdd);
+                }
+            }
+        }
+
+        //Now need to format the path attribute string
+        for(var i=0;i<regions.length;i++) {
+            var regionData = regions[i]['$'].d;
+            
+            if(regionData.match(/[CHVSQTAchvsqta]+/)) {
+                throw new Error("SVG Path can only contain Line Segments (L), Move to (M) or Close path (Z) Characters.");
+            }
+
+            //test if there are spaces inbetween 
+
+            //if it doesn't contain the Z Character then just add it on the end
+            if(!(regionData.includes("Z"))) {
+                regionData += " Z"
+            }
+
+            console.log(regionData);
+
+            if(i==0) {
+                break;
+            }
+        }
     }
 
     /**
@@ -60,13 +139,16 @@ class SVGLoader {
         var height = this.JSONData.svg["$"].height;
         var width = this.JSONData.svg["$"].width;
 
-        var heightNumber = height.replace(/\D/g, "");
-        var widthNumber = width.replace(/\D/g, "");
-
-        this.map = new Map(parseInt(heightNumber),parseInt(widthNumber));
+        this.map = new Map(parseFloat(height),parseFloat(width));
 
         //Collect the coordinates of all the regions in the map file
-        var arrayOfRegions = this.JSONData.svg.path;
+        var arrayOfRegions = null;
+        
+        arrayOfRegions = this.JSONData.svg.g[0].path;
+
+        if(typeof arrayOfRegions === "undefined" ) {
+            arrayOfRegions = this.JSONData.svg.path;
+        }
         
         for(var i=0;i<arrayOfRegions.length;i++) {
             //get the element corresonding to the coordinates of the region
@@ -75,7 +157,19 @@ class SVGLoader {
             //put this into an array
             //stores the Z charater as the last element in the array
             var coordinateArray = coordinateString.split(" ");
+
             var newRegion = new Region();
+
+            //Under the standard format that the algorithm is expecting, this is where the
+            //name of each region should be stored.
+            try{
+                var regionName = arrayOfRegions[i].name[0];
+                newRegion.setName(regionName);
+            } catch(err) {
+                //this means no name is present - NEED a WAY TO HANDLE THIS
+                console.error("No Name Present");
+            }
+
 
             for(var j=0;j<coordinateArray.length;j++) {
 
@@ -90,6 +184,7 @@ class SVGLoader {
                 }
                 var xycoordinate = coordinateArray[j].match(/\d+\.\d/g);
                 var drawChar = coordinateArray[j][0];
+
                 var newCoordinate = new SVGCoordinate(drawChar,parseFloat(xycoordinate[0]),parseFloat(xycoordinate[1]),isEnd);
 
                 newRegion.addCoordinate(newCoordinate);
@@ -148,7 +243,8 @@ class SVGLoader {
         
         //Draw the grid
         //variables for scaling the grid number to the actual canvas coordinates
-        /*
+        //mainly for debugging purposes
+        
         var scaleX = this.map.xsize / xsize;
         var scaleY = this.map.ysize / ysize;
 
@@ -170,7 +266,7 @@ class SVGLoader {
             context.lineTo(this.map.xsize,i*scaleY);
             context.stroke();
         }
-        */
+        
         
         //Save the canvas onto an external png file
         var out = fs.createWriteStream(filePath);
@@ -265,6 +361,8 @@ class Region {
      */
     constructor() {
         this.coordinates = new ArrayList();
+        this.colour = null;
+        this.name = null;
     }
 
     /**
@@ -273,6 +371,23 @@ class Region {
      */
     addCoordinate(c) {
         this.coordinates.add(c);
+    }
+
+    /**
+     * Method for setting the name of a particular region.
+     * @param {String} regionName 
+     */
+    setName(regionName) {
+        this.name = regionName;
+    }
+
+    /**
+     * Method for adding a colour to the region. This field is optional.
+     * Must be in this format #777777 or #eeeeee for example where these are
+     * hexadecimal numbers.
+     */
+    setColour(colour) {
+        this.colour = colour;
     }
 
     getArea() {
@@ -507,11 +622,13 @@ class GridSquare {
 
 
 //tests
-/*
+
 var xsize = 4;
 var ysize = 2;
 var svgLoader = new SVGLoader();
-svgLoader.readSVGFile("/../uploads/mapFile.svg");
+//svgLoader.readSVGFile("/../SVGFiles/DifferentFormats/highchartsUK.svg");
+svgLoader.readSVGFile("/../SVGFiles/DifferentFormats/wikiUk.svg");
+/*
 svgLoader.collectMapData();
 svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname, "/../public/images/map.png"));
 
