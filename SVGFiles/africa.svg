@@ -7,7 +7,6 @@ Map version: 1.1.2
 Copyright (c) 2015 Highsoft AS, Based on data from Natural Earth
 </desc>
 <title>Africa</title>
-<g id="admin0">
 
 <path fill="#CEE3F5" stroke="#6E6E6E" stroke-width="0.4" id="UG" d="M489.1,343.2 L488.2,343.5 L487.4,342.8 L488.5,342.7 Z M496.1,338.9 L496.5,337.7 L497.6,337.7 L497.3,339.5 Z M484.6,348.5 L484.6,348.4 L484.7,348.5 Z M466.2,344.1 L468.4,341.3 L466.6,340.9 L468.7,335.9 L468.7,333.5 L473.3,329.8 L474.1,331.5 L477.2,327.4 L481.0,324.5 L480.0,322.0 L475.3,319.5 L476.5,315.9 L475.6,314.7 L476.4,310.9 L478.9,308.4 L482.0,309.5 L484.3,308.2 L487.7,310.7 L489.3,308.9 L494.8,307.7 L499.1,308.6 L502.9,304.9 L504.5,308.6 L506.8,309.5 L506.3,311.8 L507.9,315.6 L510.8,319.5 L511.2,326.2 L509.7,329.9 L507.2,331.0 L502.9,338.2 L499.3,338.7 L496.8,337.0 L494.6,339.2 L491.1,339.0 L485.4,341.3 L486.2,342.7 L483.5,346.8 L484.2,348.5 L476.2,348.5 L473.2,349.0 L468.4,352.4 L465.7,351.7 L465.5,347.8 Z">
   <desc xmlns="http://www.highcharts.com/svg/namespace">
@@ -1034,7 +1033,6 @@ Copyright (c) 2015 Highsoft AS, Based on data from Natural Earth
     <hc-a2>CF</hc-a2>
   </desc>
 </path>
-</g>
 
 <text x="350" y="714" text-anchor="middle" font-family="Verdana" font-size="8" stroke-opacity="0.6">Copyright (c) 2015 Highsoft AS, Based on data from Natural Earth</text>
 

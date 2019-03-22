@@ -78,6 +78,7 @@ app.post('/fileUpload',(req,res) =>{
             
             svgLoader.readSVGFile("/../uploads/mapFile.svg");
             svgLoader.collectMapData();
+            
             //xsize and ysize passed for drawing the grid just tp get a visualization
             svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
             
