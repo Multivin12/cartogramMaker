@@ -173,26 +173,54 @@ function calculateDensities() {
         dataInfo.set(line[0],parseFloat(line[1]));
     }
 
+    //cycle through to check if all the info is okay
+    var values = dataInfo.values();
+    for(var i=0;i<values.length;i++) {
+        if(isNaN(values[i])){
+            throw new Error("Data File corrupted. Index: " + i);
+        }
+    }
+
+
     //Now need to change the value stored in the hashmap to be the density for that region.
 
     //Density is defined as the data value for a certain region divided by it's original area.
+    var densityInfo = new HashMap();
     var totalDensityValue = 0;
     for(var i=0;i<svgLoader.map.regions.length;i++) {
         var region = svgLoader.map.regions.get(i);
         var popValue = dataInfo.get(region.name);
 
-        var densityValue = popValue/region.getArea();
+        var area = region.getArea();
+        if(area === 0) {
+            area = 1;
+        }
 
-        dataInfo.set(region.name,densityValue);
+        var densityValue = popValue/area;
+
+        if(isNaN(densityValue)){
+            console.log("WARNING: DATA VALUE MISSING FOR MAP REGION NAME: " + region.name);
+            densityValue = area;
+        }
+        densityInfo.set(region.name,densityValue);
 
         totalDensityValue += densityValue;
     }
 
     var meanDensityValue = totalDensityValue/svgLoader.map.regions.length;
 
-    dataInfo.set("Sea",meanDensityValue);
+    densityInfo.set("Sea",meanDensityValue);
 
-    return dataInfo;
+    //cycle through to check if all the info is okay
+    var values = densityInfo.values();
+    var counter = 0;
+    for(var i=0;i<values.length;i++) {
+        if(isNaN(values[i])){
+            //throw new Error("Not all regions in SVG file have matching data.");
+            counter++;
+        }
+    }
+    return densityInfo;
 }
 
 /*
@@ -233,7 +261,6 @@ function createDensityGrid(densityHashMap) {
             //densityGrid [i][j] += (1-percentTotal)*densityHashMap.get("Sea");
         }
     }
-    console.log(densityGrid);
     return densityGrid;
 }
 
@@ -269,7 +296,6 @@ function updateCoordinates(newGridPoints) {
 
             region.coordinates[j] = newCoordinate;
         }
-        //console.log(region.getArea());
     }
     svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/cartogram.png'));
 }
