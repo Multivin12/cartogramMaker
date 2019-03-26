@@ -1,0 +1,122 @@
+body,
+html {
+  height: 100%;
+  min-height:100%;
+  width: 100%;
+  margin: 0;
+}
+.gallery {
+  width:0;
+  height:0;
+}
+#bold{
+  font-weight:bold;
+}
+.selected{
+  background-color:#262626;
+}
+.previous {
+ font-size:110px;
+ color:#262626;
+ position:absolute;
+ z-index:6;
+ top:40vh;
+ left:0%;
+}
+
+.next {
+  font-size:110px;
+  color:#262626;	
+  position:absolute;
+  z-index:6;
+  top:40vh;	
+  right:0%;
+}
+
+
+/* CSS of the current image in the gallery */
+#gallery img{
+  height:0;
+  width:0;
+}
+
+/* CSS of the gallery buttons */
+#pic1{
+  position:absolute;
+  bottom:2vh;
+  left:40vw;
+}
+
+#pic2{
+  position:absolute;
+  bottom:2vh;
+  left:50vw;
+}
+
+#pic3{
+  position:absolute;
+  bottom:2vh;
+  left:60vw;
+}
+p button {
+  border-color: #262626;
+  padding: 5px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+p button:focus {
+  outline:none;
+}
+.next:hover {
+  text-decoration: none;
+  color:#262626;
+}
+.previous:hover {
+  text-decoration: none;
+  color:#262626;
+}
+
+/*picInfo is a div added by js to project html elements onto the gallery*/
+#picInfo h1{
+  position:absolute;
+  left:45%;
+  top:40%;
+  font-size:3vw; 
+}
+#cartogramUse {
+  position:absolute;
+  top:65%;
+}
+.btn.btn-primary{
+  position:absolute;
+  font-size:2vw;
+  left:45%;
+  top:60%;
+}
+#picInfo p {
+  position:absolute;
+  left:45%;
+  top:50%;
+  font-size:2vw;
+  margin-right:2vw;
+}
+.logo{
+  color:#b3b3b3 !important;
+}
+
+@media screen and (max-width: 700px) {
+
+   
+   #picInfo h1{
+    font-size:4.5vw;
+  }
+  #picInfo button{
+    font-size:3.5vw;
+  }
+  #picInfo p {
+    font-size:3.5vw;
+  }
+}

@@ -1,0 +1,70 @@
+body,
+html {
+  height: 100%;
+  min-height:100%;
+  width: 100%;
+  margin: 0;
+}
+#bold{
+    font-weight:bold;
+}
+#navigator {
+    position: absolute;
+    font-size:25px;
+    top:100px;
+    left:30%;
+    right:30%;
+    width:60%;
+}
+#navigator a{
+    text-decoration: none;
+}
+img {
+    position: absolute;
+    top:240px;
+    left:35vw;
+    height:300px;
+    width:300px;
+}
+.btn.btn-primary {
+    position:absolute;
+    left:52.5vw;
+    bottom:0px;
+}
+table {
+    width:300px !important;
+    position:absolute;
+    top:240px;
+    left:35vw;
+}
+.table th,.table td{
+    padding:0px !important;
+}
+/*CSS for the tab buttons*/
+.btn.btn-outline-success{
+    position:relative;
+    left:36vw;
+    top:100px;
+    padding-left:50px;
+    padding-right:50px;
+    border-color:#262626;
+    color:#262626;
+}
+.btn.btn-outline-success:hover{
+    color:#262626;
+    background-color: #d9d9d9;
+    border-color:#262626;
+}
+.btn.btn-outline-success.active{
+    background-color: #262626 !important;
+    border-color:#262626 !important;
+}
+/*To override the color surrounding the button*/
+.btn.btn-outline-success.focus.active{
+    box-shadow: none;
+}
+.btn.btn-outline-success:active{
+    background-color: #d9d9d9 !important;
+    border-color:#262626 !important;
+    color:#262626 !important;
+}
