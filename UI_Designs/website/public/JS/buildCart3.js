@@ -1,3 +1,35 @@
+
+var socket = io();
+
+socket.on("initial",() => {
+    console.log("initial Set up");
+})
+
+socket.on("densityHashMap", () => {
+    console.log("building density Hash Map");
+});
+
+socket.on("densityGrid", () => {
+    console.log("building density grid");
+});
+
+socket.on("GastnerNewman", () => {
+    console.log("building cartogram");
+});
+
+socket.on("updateCoordinates", () => {
+    console.log("updating coordinates");
+});
+
+socket.on("Draw SVG File", () => {
+    console.log("Drawing final map file");
+});
+
+socket.on("end", () => {
+    console.log("Finished!");
+});
+
+
 var i;
 var timeOut = 1000;
 var pauseStatus = false;

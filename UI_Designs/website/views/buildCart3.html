@@ -6,7 +6,8 @@
 	<meta name="viewport" content= "width = device-width, initial-scale = 1">
 	<title> Build Cartogram </title>
 	<link rel="stylesheet" href="CSS/header.css"  type="text/css">
-    <link rel="stylesheet" href="CSS/buildCart3.css"  type="text/css">
+	<link rel="stylesheet" href="CSS/buildCart3.css"  type="text/css">
+	<script src="/socket.io/socket.io.js"></script>
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="JS/buildCart3.js"></script>
@@ -47,7 +48,7 @@
             </div>
         </div>
 
-        <a id="next" href="javascript:pause()"><button id="pause" type="button" class="btn btn-primary">Pause</button></a>
+        <a id="next" href="/begin"><button id="pause" type="button" class="btn btn-primary">Begin</button></a>
         <button type="button" class="btn btn-success"><span class="fa fa-question" aria-hidden="true"></span></button>
     </div>	
     <br>

@@ -37,7 +37,7 @@ socket.on('dataRecieved',(data) => {
     var tbody = $("<tbody/>");
     for(var i=0;i<data.length;i++) {
         var line = data[i].split(",");
-        var tr = $("<tr/>")
+        var tr = $("<tr/>");
         
         var td1 = $("<td/>");
         td1.attr("scope","row");

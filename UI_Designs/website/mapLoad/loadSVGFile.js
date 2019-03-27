@@ -196,6 +196,7 @@ class SVGLoader {
 
         var numRegions = regions.length;
         for(var j=0;j<regions.length;j++) {
+
             var flag = false;
 
             try{
@@ -218,12 +219,14 @@ class SVGLoader {
             }
         }
 
+
         //next is to test if the name of a region is stored in an attribute (like it is for AM Charts)
         var regions = this.JSONData.svg.path;
         for(var i=0;i<regions.length;i++) {
             var title = regions[i]["$"].title;
-
-            this.JSONData.svg.path[i].name = [title];
+            if(typeof(title) !== "undefined") {
+                this.JSONData.svg.path[i].name = [title];
+            }
         }
 
 
