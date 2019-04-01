@@ -21,9 +21,13 @@ var canvasSizeY = 700;
  */
 class SVGLoader {
 
-    constructor() {
+    constructor(obj) {
         this.JSONData = null;
         this.map = null;
+
+        if(obj) {
+            Object.assign(this,obj);
+        }
     }
 
     /** 
@@ -490,7 +494,7 @@ class Region {
     /**
      * Constructor that takes in an empty argument.
      */
-    constructor() {
+    constructor(obj) {
         this.coordinates = new ArrayList();
         this.colour = null;
         this.name = null;

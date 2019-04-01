@@ -1,33 +1,120 @@
 
 var socket = io();
 
-socket.on("initial",() => {
-    console.log("initial Set up");
+function startBuild(){
+
+    //set up everything
+    var progressBar = $(".progress-bar");
+    var label = $("#Info");
+    var labelError = $("#Error");
+    i=5;
+    progressBar.attr("style","width:" + i +"%");
+    progressBar.removeClass("bg-danger");
+    label.empty();
+    label.append("Status: Gathering Data");
+    labelError.empty();
+
+    $("#next").removeAttr("href");
+    socket.emit("Build");
+}
+
+socket.on("gatheredData", (data) => {
+    var progressBar = $(".progress-bar");
+    var label = $("#Info");
+
+    label.empty();
+    label.append("Status: Calculating area of each Region.")
+
+    var i = 10;
+
+    progressBar.empty();
+    progressBar.attr("style","width:" + i +"%")
+    progressBar.append(i + "%");
+
+    socket.emit("buildDensityArray",data);
+});
+
+socket.on("builtDensityArray" ,(data) => {
+    var progressBar = $(".progress-bar");
+    var label = $("#Info");
+
+    label.empty();
+    label.append("Status: Calculating density grid.")
+
+    var i = 20;
+
+    progressBar.empty();
+    progressBar.attr("style","width:" + i +"%")
+    progressBar.append(i + "%");
+
+    socket.emit("buildDensityGrid",data);
 })
 
-socket.on("densityHashMap", () => {
-    console.log("building density Hash Map");
-});
+socket.on("builtDensityGrid",(data) =>{
+    var progressBar = $(".progress-bar");
+    var label = $("#Info");
 
-socket.on("densityGrid", () => {
-    console.log("building density grid");
-});
+    label.empty();
+    label.append("Status: Running Algorithm.")
 
-socket.on("GastnerNewman", () => {
-    console.log("building cartogram");
-});
+    var i = 40;
 
-socket.on("updateCoordinates", () => {
-    console.log("updating coordinates");
-});
+    progressBar.empty();
+    progressBar.attr("style","width:" + i +"%")
+    progressBar.append(i + "%");
+    socket.emit("Run algorithm",data);
+})
 
-socket.on("Draw SVG File", () => {
-    console.log("Drawing final map file");
-});
+socket.on("Ran algorithm",(data) => {
+    var progressBar = $(".progress-bar");
+    var label = $("#Info");
 
-socket.on("end", () => {
-    console.log("Finished!");
-});
+    label.empty();
+    label.append("Status: Updating Grid Points.")
+
+    var i = 75;
+
+    progressBar.empty();
+    progressBar.attr("style","width:" + i +"%")
+    progressBar.append(i + "%");
+    socket.emit("Update Grid Points",data);
+})
+
+socket.on("Updated points",(data) => {
+    var progressBar = $(".progress-bar");
+    var label = $("#Info");
+
+    label.empty();
+    label.append("Status: Creating SVG File.")
+
+    var i = 95;
+
+    progressBar.empty();
+    progressBar.attr("style","width:" + i +"%")
+    progressBar.append(i + "%");
+    socket.emit("Draw to SVG",data);
+})
+
+socket.on("Finished!",() => {
+    var progressBar = $(".progress-bar");
+    var label = $("#Info");
+    var button = $(".btn.btn-primary")
+
+    label.empty();
+    label.append("Status: Finished!")
+
+    var i = 100;
+
+    progressBar.empty();
+    progressBar.attr("style","width:" + i +"%")
+    progressBar.append(i + "%");
+
+    button.empty();
+    button.append("Next");
+
+    $("#next").removeAttr("href");
+    $("#next").attr("href","buildCart4");
+})
 
 
 var i;

@@ -1,8 +1,11 @@
 //express is for handling requests
 const express = require('express');
+const ArrayList = require('arraylist');
 const app = express();
 //this is how to use express in conjunction with socket.io
 const server = app.listen("3000");
+//This library is used to make sections of code run synchronously
+var async = require("async");
 //the library to send events onto client side javascript
 const io = require('socket.io').listen(server);
 //passing template variables into html
@@ -30,15 +33,13 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 20;
-var ysize = 20;
+var xsize = 30;
+var ysize = 30;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
 app.get('/',(req,res) => {
     res.sendFile(path.join(__dirname+'/views/index.html'));
-    //event sent to client side javascript
-    //io.emit('Catrina','Chicken');
 });
 
 //first build Cartogram page
@@ -122,37 +123,37 @@ app.get("/buildCart3",(req,res) => {
     res.render(__dirname + "/views/buildCart3.html");
 })
 
-app.get("/begin",(req,res) => {
-    buildCartogram();
-    res.status(200);
+app.get("/buildCart4",(req,res) => {
+    res.render(__dirname+"/views/buildCart4.html");
 })
 
-//Function that handles the cartogram generation
-function buildCartogram() {
-    //gather the data from the SVG file and store it into the SVG Loader
-    io.emit("initial");
-    gatherData();
-    io.emit("densityHashMap");
-    //calculate the densities of the map using the map and data file
-    var densityHashMap = calculateDensities();
-    io.emit("densityGrid");
-    //calculate the density grid with these values
-    var densityGrid = createDensityGrid(densityHashMap);
-    io.emit("GastnerNewman");
-    //get the new set of grid points from the Gastner-Newman algorithm
-    var newGridPoints = gastnerNewmann(densityGrid);
-    io.emit("updateCoordinates");
-    //use bilinear interpolation to update the map
-    //generate the png as a result.
-    updateCoordinates(newGridPoints);
-    io.emit("Draw SVG File");
-    //Method for building the SVG File of the cartogram
-    createSVGFile();
-    io.emit("end");
-}
+app.get("/downloadMap",(req,res) => {
+    var file = path.join(__dirname + '/uploads/mapFile.svg');
+    res.download(file,'mapFile.svg');
+})
 
-function createSVGFile() {
-    svgLoader.drawMapToSVG(path.join(__dirname + "/cartogramFile.svg"));
+app.get("/downloadCart",(req,res) => {
+    var file = path.join(__dirname + '/cartogram.svg');
+    res.download(file,'cartogram.svg');
+})
+
+function createSVGFile(svgLoad) {
+
+    //assign everything to its correct object as javascript just converts it
+    //to an ordinary object
+    svgLoad = Object.assign(new SVGLoader,svgLoad);
+    svgLoad.map = Object.assign(new Map, svgLoad.map);
+    svgLoad.map.regions = Object.assign(new ArrayList, svgLoad.map.regions);
+    
+    for(var i=0;i<svgLoad.map.regions.length;i++) {
+        var region = svgLoad.map.regions.get(i);
+        region = Object.assign(new Region,svgLoad.map.regions.get(i));
+        svgLoad.map.regions.set(i,region);
+
+        svgLoad.map.regions.get(i).coordinates = Object.assign(new ArrayList,svgLoad.map.regions.get(i).coordinates);
+    }
+
+    svgLoad.drawMapToSVG(path.join(__dirname + "/cartogramFile.svg"));
 }
 
 
@@ -165,18 +166,35 @@ function createSVGFile() {
 //function for handling the data gathering from the SVG file
 function gatherData() {
     svgLoader.readSVGFile("/../uploads/mapFile.svg");
-    svgLoader.collectMapData();
+    svgLoader.collectMapData();  
+    return svgLoader;
 }
 
 //function to calculate the densities for all regions
 //returns the density array for every region with the last element
 //equalling the mean density of the entire map.
-function calculateDensities() {
+function calculateDensities(svgLoad) {
+
+    //assign everything to its correct object as javascript just converts it
+    //to an ordinary object
+    svgLoad = Object.assign(new SVGLoader,svgLoad);
+    svgLoad.map = Object.assign(new Map, svgLoad.map);
+    svgLoad.map.regions = Object.assign(new ArrayList, svgLoad.map.regions);
+    
+    for(var i=0;i<svgLoad.map.regions.length;i++) {
+        var region = svgLoad.map.regions.get(i);
+        region = Object.assign(new Region,svgLoad.map.regions.get(i));
+        svgLoad.map.regions.set(i,region);
+
+        svgLoad.map.regions.get(i).coordinates = Object.assign(new ArrayList,svgLoad.map.regions.get(i).coordinates);
+    }
+
     //An array for storing the areas of every region in the map
-    var areas = new Array(svgLoader.map.regions.length);
+    var areas = new Array(svgLoad.map.regions.length);
+
 
     for(var i=0;i<areas.length;i++) {
-        areas[i] = svgLoader.map.regions.get(i).getArea();
+        areas[i] = svgLoad.map.regions.get(i).getArea();
     }
 
     //gather the data from the data file for each region
@@ -208,8 +226,8 @@ function calculateDensities() {
     //Density is defined as the data value for a certain region divided by it's original area.
     var densityInfo = new HashMap();
     var totalDensityValue = 0;
-    for(var i=0;i<svgLoader.map.regions.length;i++) {
-        var region = svgLoader.map.regions.get(i);
+    for(var i=0;i<svgLoad.map.regions.length;i++) {
+        var region = svgLoad.map.regions.get(i);
         var popValue = dataInfo.get(region.name);
 
         var area = region.getArea();
@@ -228,7 +246,7 @@ function calculateDensities() {
         totalDensityValue += densityValue;
     }
 
-    var meanDensityValue = totalDensityValue/svgLoader.map.regions.length;
+    var meanDensityValue = totalDensityValue/svgLoad.map.regions.length;
 
     densityInfo.set("Sea",meanDensityValue);
 
@@ -241,6 +259,7 @@ function calculateDensities() {
             counter++;
         }
     }
+
     return densityInfo;
 }
 
@@ -249,6 +268,8 @@ function calculateDensities() {
  * This is what is needed by the algorithm to generate the cartogram.
 */
 function createDensityGrid(densityHashMap) {
+
+    densityHashMap = Object.assign(new HashMap,densityHashMap);
     //now generate the grid
     var grid = new Grid(xsize,ysize,svgLoader.map.xsize,svgLoader.map.ysize);
     //This is the density grid to be passed into the algorithm
@@ -282,15 +303,22 @@ function createDensityGrid(densityHashMap) {
             //densityGrid [i][j] += (1-percentTotal)*densityHashMap.get("Sea");
         }
     }
+
     return densityGrid;
 }
 
 // Method to update the region coordinates with the newly generated grid points
 function updateCoordinates(newGridPoints) {
+
+    var svgLoader = new SVGLoader();
+    svgLoader.readSVGFile("/../uploads/mapFile.svg");
+    svgLoader.collectMapData();
+
     //use an interpreter to convert the region grid points onto the new grid
     var interp = new Interpreter(newGridPoints,xsize,ysize);
 
     //go through the entire map and change the grid points
+
     var regions = svgLoader.map.regions;
 
     for(var i=0;i<regions.length;i++) {
@@ -319,10 +347,12 @@ function updateCoordinates(newGridPoints) {
         }
     }
     svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/cartogram.png'));
+    return svgLoader;
 }
 
 console.log("Running at Port 3000");
 
+//Event listeners
 io.on('connection', function(socket){
     console.log('User Connected');
 
@@ -339,7 +369,42 @@ io.on('connection', function(socket){
 
         socket.emit('dataRecieved',dataArray);
     })
+
+    //For handling each stage of the cartogram build process
+    socket.on('Build', () => {
+        var svg = gatherData();
+        io.emit("gatheredData",(svg));
+    })
+
+    socket.on('buildDensityArray',(data) => {
+        var svgLoad = data;
+        var densityHashMap = calculateDensities(svgLoad);
+        io.emit("builtDensityArray",(densityHashMap));
+    })
+
+    socket.on("buildDensityGrid",(data) => {
+        var densityHashMap = data;
+        var densityGrid = createDensityGrid(densityHashMap);
+        io.emit("builtDensityGrid",(densityGrid));
+    })
+
+    socket.on("Run algorithm",(data) => {
+        var densityGrid = data;
+        var newGridPoints = gastnerNewmann(densityGrid);
+        io.emit("Ran algorithm",(newGridPoints));
+    })
+
+    socket.on("Update Grid Points",(data) => {
+        var newGridPoints = data;
+        var svgLoader = updateCoordinates(newGridPoints);
+        io.emit("Updated points",(svgLoader));
+    })
+
+    socket.on("Draw to SVG",(data) =>{
+        var svgLoad = data;
+        createSVGFile(svgLoad);
+        io.emit("Finished!");
+    })
+
 });
-
-
 
