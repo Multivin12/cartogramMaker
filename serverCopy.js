@@ -250,16 +250,6 @@ function calculateDensities(svgLoad) {
 
     densityInfo.set("Sea",meanDensityValue);
 
-    //cycle through to check if all the info is okay
-    var values = densityInfo.values();
-    var counter = 0;
-    for(var i=0;i<values.length;i++) {
-        if(isNaN(values[i])){
-            //throw new Error("Not all regions in SVG file have matching data.");
-            counter++;
-        }
-    }
-
     return densityInfo;
 }
 
@@ -272,6 +262,7 @@ function createDensityGrid(densityHashMap) {
     densityHashMap = Object.assign(new HashMap,densityHashMap);
     //now generate the grid
     var grid = new Grid(xsize,ysize,svgLoader.map.xsize,svgLoader.map.ysize);
+
     //This is the density grid to be passed into the algorithm
     var densityGrid = DCT2.initialize2DArray(xsize,ysize);
     
@@ -290,6 +281,8 @@ function createDensityGrid(densityHashMap) {
                 var curPercentTotal = grid.gridSquares[i][j].getPercentage(svgLoader.map.regions.get(k));
                 percentTotal += curPercentTotal;
                 densityTotal += curPercentTotal*densityHashMap.get(svgLoader.map.regions.get(k).name);
+
+                console.log(k,svgLoader.map.regions.length);
             }
 
             //to add in the sea part of a grid square
@@ -299,6 +292,8 @@ function createDensityGrid(densityHashMap) {
             } else {
                 densityGrid[i][j] = densityTotal;
             }
+
+            console.log(j,grid.gridSquares[i].length);
 
             //densityGrid [i][j] += (1-percentTotal)*densityHashMap.get("Sea");
         }
@@ -310,9 +305,6 @@ function createDensityGrid(densityHashMap) {
 // Method to update the region coordinates with the newly generated grid points
 function updateCoordinates(newGridPoints) {
 
-    var svgLoader = new SVGLoader();
-    svgLoader.readSVGFile("/../uploads/mapFile.svg");
-    svgLoader.collectMapData();
 
     //use an interpreter to convert the region grid points onto the new grid
     var interp = new Interpreter(newGridPoints,xsize,ysize);
@@ -407,4 +399,23 @@ io.on('connection', function(socket){
     })
 
 });
+
+/*
+//Function that handles the cartogram generation
+function buildCartogram() {
+    //gather the data from the SVG file and store it into the SVG Loader
+    gatherData();
+    //calculate the densities of the map using the map and data file
+    var densityHashMap = calculateDensities();
+    //calculate the density grid with these values
+    var densityGrid = createDensityGrid(densityHashMap);
+    //get the new set of grid points from the Gastner-Newman algorithm
+    var newGridPoints = gastnerNewmann(densityGrid);
+    //use bilinear interpolation to update the map
+    //generate the png as a result.
+    updateCoordinates(newGridPoints);
+    //Method for building the SVG File of the cartogram
+    createSVGFile();
+}
+*/
 

@@ -497,9 +497,9 @@ function randomData(xsize,ysize) {
     }
 }
 
-//real-world data
+//real-world data taken from the brexit results
 function realWorldData(xsize,ysize) {
-
+    //decided that im going to have seperate files for the different sizes
 }
 
 

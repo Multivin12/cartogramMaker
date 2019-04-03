@@ -7,8 +7,11 @@ function startBuild(){
     var progressBar = $(".progress-bar");
     var label = $("#Info");
     var labelError = $("#Error");
-    i=5;
+
+    var i=5;
+    progressBar.empty();
     progressBar.attr("style","width:" + i +"%");
+    progressBar.append(i + "%");
     progressBar.removeClass("bg-danger");
     label.empty();
     label.append("Status: Gathering Data");
