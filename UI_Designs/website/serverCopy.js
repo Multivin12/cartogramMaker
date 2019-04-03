@@ -106,7 +106,7 @@ app.post('/fileUpload',(req,res) =>{
             
             //xsize and ysize passed for drawing the grid just tp get a visualization
             svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
-            
+            svgLoader.drawMapToSVG(path.join(__dirname + '/public/images/map.svg'));
             res.render(__dirname + '/views/buildCart2.html');
         } else {
             if(success == null) {
