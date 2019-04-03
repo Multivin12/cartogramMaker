@@ -12,15 +12,22 @@ const fs = require('fs');
 const {createCanvas, loadImage} = require('canvas');
 const polygonClipping = require('polygon-clipping');
 
+var canvasSizeX = 700;
+var canvasSizeY = 700;
+
 /**
  * Class for handling the process of loading SVG files. Has a field JSON Data which is the
  * JSON equivalent of the loaded SVG file as well as a field for storing the map data.
  */
 class SVGLoader {
 
-    constructor() {
+    constructor(obj) {
         this.JSONData = null;
         this.map = null;
+
+        if(obj) {
+            Object.assign(this,obj);
+        }
     }
 
     /** 
@@ -111,79 +118,51 @@ class SVGLoader {
             //String replace prototype function
             String.prototype.replaceAt=function(index, replacement) {
                 return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
+            };
+
+            if(regionData.match(/[HVSQTAhvsqta]+/)) {
+                throw new Error("SVG Path can only contain Line Segments (L), Circular lines(C), Move to (M) or Close path (Z) Characters. Path Attribute Number= " + i +".");
             }
 
-            if(regionData.match(/[CHVSQTAchvsqta]+/)) {
-                if(regionData.match(/[Cc]+/)) {
-                    console.log("WARNING: CURVES DETECTED FOR REGION " + i + " PLEASE WAIT.");
-                    //Need to convert the circular paths to line segments.
-                    //Firstly find the index of all C chars
-                    var regex = /(?<=[0-9])(\s|[Cc])(?=[0-9])/g, result, indices = [];
-                    while ( (result = regex.exec(regionData)) ) {
-                        indices.push(result.index);
-                    }
-
-                    //also need to find the positions of the M characters
-                    var regex = /(?<=[0-9])[Mm](?=[0-9])/g, result, indicesM = [];
-                    while ( (result = regex.exec(regionData)) ) {
-                        indicesM.push(result.index);
-                    }
-
-                    //Now cycle through the string and replace the spaces in between the coordinates with L
-                    for(var j=0;j<indices.length;j++) {
-                        if(j%2 ===1) {
-                            regionData = regionData.replaceAt(indices[j + this.numberOfValuesSmallerThan(indicesM,indices[j]) ], "L");
-                        }
-                    }
-                } else {
-                    throw new Error("SVG Path can only contain Line Segments (L), Circular lines(C), Move to (M) or Close path (Z) Characters. Path Attribute Number= " + i +".");
-                }
-            }
             
-            //test if there are spaces inbetween two numbers
-            //as there is for the wikipedia SVG File
-            var regex = /(?<=[0-9])\s(?=[0-9])/g, result, indices = [];
+            if(regionData.match(/[Cc]+/)) {
+                console.log("WARNING: CURVES DETECTED FOR REGION " + i + " PLEASE WAIT.");
+            }
+            //Need to convert the circular paths to line segments.
+            //Firstly find the index of all C chars
+            var regex = /(?<=[0-9])(\s|[Cc]|[Mm]|[Ll])(?=[0-9])/g, result, indices = [];
+            //variable to record whether you replace the character or not
+            var doReplace = false;
+            var j = 0;
             while ( (result = regex.exec(regionData)) ) {
                 indices.push(result.index);
-            }
-
-            //Now cycle through the string and replace the spaces in between the coordinates with commas
-            for(var j=0;j<indices.length;j++) {
-                regionData = regionData.replaceAt(indices[j], ",");
-            }
+                //to test that an M character has been matched
+                if(regionData[result.index] == "M") {
+                    regionData = regionData.replaceAt(indices[j]-1," M");
+                    doReplace = false;
+                }else if(regionData[result.index] == "L") {
+                    regionData = regionData.replaceAt(indices[j]-1," L");
+                    doReplace = false;
+                }else if(doReplace) {
+                    regionData = regionData.replaceAt(indices[j]-1," L");
+                    doReplace = false;
+                } else {
+                    regionData = regionData.replaceAt(indices[j],",");
+                    doReplace = true;
+                }
+                console.log(j);
+                j++;
+            }   
+            
 
             //if it doesn't contain the Z Character then just add it on the end
             if(!(regionData.includes("Z"))) {
-                regionData += " Z"
+                regionData += " Z";
             }
 
-
-            //test if there is the letter L inbetween two numbers
-            //as there is for the wikipedia SVG File and there should be a space before the L character.
-            var regex = /(?<=[0-9])L{1}(?=[0-9])/g, result, indices = [];
-            while ( (result = regex.exec(regionData)) ) {
-                indices.push(result.index);
-            }
-
-            //Now cycle through the string and inset an L with a space before it
-            for(var j=0;j<indices.length;j++) {
-                regionData = regionData.replaceAt(indices[j]-1, " L");
-            }
-
-            //Now need to do the same for the M characters
-            var regex = /(?<=[0-9])M{1}(?=[0-9])/g, result, indices = [];
-            while ( (result = regex.exec(regionData)) ) {
-                indices.push(result.index);
-            }
-
-            //Now cycle through the string and inset an M with a space before it
-            for(var j=0;j<indices.length;j++) {
-                regionData = regionData.replaceAt(indices[j]-1, " M");
-            }
             //must include this at the bottom as Strings are immutable
             this.JSONData.svg.path[i]['$'].d = regionData;
         }
-
         //next is to combine regions together as the path attributes are seperate if a Region spans accross multiple islands
         //for the wikipedia SVG File
         //This is done by checking if a region has a name then adding following paths to that region if they don't have a name.
@@ -193,6 +172,7 @@ class SVGLoader {
 
         var numRegions = regions.length;
         for(var j=0;j<regions.length;j++) {
+
             var flag = false;
 
             try{
@@ -215,35 +195,20 @@ class SVGLoader {
             }
         }
 
+
         //next is to test if the name of a region is stored in an attribute (like it is for AM Charts)
         var regions = this.JSONData.svg.path;
         for(var i=0;i<regions.length;i++) {
             var title = regions[i]["$"].title;
-
-            this.JSONData.svg.path[i].name = [title];
+            if(typeof(title) !== "undefined") {
+                this.JSONData.svg.path[i].name = [title];
+            }
         }
-
 
         if(this.JSONData.svg.path[numRegions-1].name == null) {
             throw new Error("Reached end of file with no name info present.");
         }
-    }
-
-    /**
-     * Method for testing how many numbers in a list are smaller than a given number.
-     * 
-     * @param {Array} array 
-     * @param {Number} number 
-     */
-    numberOfValuesSmallerThan(array,number) {
-
-        var counter = 0;
-        for(var i=0;i<array.length;i++) {
-            if(array[i] < number) {
-                counter++;
-            }
-        }
-        return counter;
+        //console.log(this.JSONData.svg.path[0]['$'].d);
     }
 
     /**
@@ -265,8 +230,8 @@ class SVGLoader {
         
         arrayOfRegions = this.JSONData.svg.path;
 
-        var ScaleX = 700 / this.map.ysize;
-        var ScaleY = 700 / this.map.xsize;
+        var ScaleX = canvasSizeX / this.map.ysize;
+        var ScaleY = canvasSizeY / this.map.xsize;
 
         
         for(var i=0;i<arrayOfRegions.length;i++) {
@@ -299,11 +264,10 @@ class SVGLoader {
                     //skip over the Z because obviously this is not a coordinate
                     nextj = j+1;
                 }
-                var xycoordinate = coordinateArray[j].match(/\d+\.\d/g);
+                var xycoordinate = coordinateArray[j].match(/\d+\.?\d+/g);
                 var drawChar = coordinateArray[j][0];
 
                 var newCoordinate = new SVGCoordinate(drawChar,parseFloat(xycoordinate[0]*ScaleX),parseFloat(xycoordinate[1]*ScaleY),isEnd);
-
                 newRegion.addCoordinate(newCoordinate);
                 j = nextj;
             }
@@ -320,27 +284,29 @@ class SVGLoader {
 
 
         //const canvas = createCanvas(parseFloat(this.map.xsize),parseFloat(this.map.ysize));
-        const canvas = createCanvas(700,700);
+        const canvas = createCanvas(canvasSizeX,canvasSizeY);
         const context = canvas.getContext('2d');
 
-        //Draw the rectangle with a blue background
-        
+        //Draw the rectangle containing the map
+        /*
         context.beginPath();
-        context.lineWidth = 1;
+        context.lineWidth = 5;
         context.rect(0,0,canvas.width,canvas.height);
         context.strokeStyle = 'rgb(0,0,0)';
-        context.fillStyle = 'rgb(35, 106, 169)';
-        context.fill();
         context.stroke();
-        
+        */
+
         //Draw the SVG Data into the rectangle
         context.strokeStyle = 'rgb(0,0,0)';
-        context.fillStyle = 'green';
         context.lineWidth = 1;
 
 
         //Draw the map
         for(var i=0;i<this.map.regions.length;i++) {
+            var colour = this.map.regions.get(i).colour;
+            if(colour === null) {
+                context.fillStyle = 'orange';
+            }
             context.beginPath();
             for(var j=0;j<this.map.regions[i].coordinates.length;j++) {
 
@@ -404,7 +370,8 @@ class SVGLoader {
         var svg = '';
         svg += '<!DOCTYPE svg>\n'
         //The extra bits after the svg version are all styling links
-        svg += '<svg width="' + this.map.xsize + 'px" height="' + this.map.ysize + 'px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n';
+        svg += '<svg width="' + 700 + 'px" height="' + 700 + 'px" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">\n';
+
 
         var regions = this.map.regions;
         for(var i=0;i<regions.length;i++) {
@@ -414,9 +381,9 @@ class SVGLoader {
             for(var j=0;j<region.coordinates.length;j++) {
                 var coordinate = region.coordinates.get(j);
                 if(coordinate.drawChar === 'M') {
-                    svg += 'M' + coordinate.x + ',' + coordinate.y + ' ';
+                    svg += 'M' + (coordinate.x) + ',' + (coordinate.y) + ' ';
                 } else {
-                    svg += 'L' + coordinate.x + ',' + coordinate.y + ' ';
+                    svg += 'L' + (coordinate.x) + ',' + (coordinate.y) + ' ';
                 }
                 if(coordinate.ZPresent) {
                     svg += 'Z';
@@ -428,7 +395,7 @@ class SVGLoader {
         }
         svg += '</svg>\n';
 
-        fs.writeFile("cartogram.svg", svg, function(err) {
+        fs.writeFile(filePath, svg, function(err) {
             if(err) {
                 console.log(err);
             }
@@ -482,7 +449,7 @@ class Region {
     /**
      * Constructor that takes in an empty argument.
      */
-    constructor() {
+    constructor(obj) {
         this.coordinates = new ArrayList();
         this.colour = null;
         this.name = null;
@@ -609,8 +576,9 @@ class Region {
             gridArray[0][3] = [g.bottomLeft.x,g.bottomLeft.y];
             
             //Now need to convert this intersection back to a region
+            var intersectionFull = null;
             try{
-                var intersectionFull = polygonClipping.intersection(regionArray, gridArray);
+                intersectionFull = polygonClipping.intersection(regionArray, gridArray);
             } catch (err) {
                 intersectionFull = [];
             }

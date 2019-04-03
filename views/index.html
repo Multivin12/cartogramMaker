@@ -1,48 +1,47 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <title> Homepage </title>
-        <link rel="stylesheet" type="text/css" href="/css/index.css" >
-    </head>
-    <body>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content= "width = device-width, initial-scale = 1">
+	<title> Homepage </title>
+	<link rel="stylesheet" href="/CSS/header.css"  type="text/css">
+	<link rel="stylesheet" href="/CSS/index.css"  type="text/css">
+	<script src='/socket.io/socket.io.js'></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="../JS/home.js"></script>
 
-        <header>
-            <h1>The Cartogram Maker</h1>
-            <h2>The easy way to generate cartograms.</h2> 
-        </header>
+	<!-- Bootstrap imports -->
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+</head>
 
-        
-        <div id="main">
-            <div id="Instructions">
-                <h1> Instructions for use: </h1>
-                <p>The program has a very simple workflow that is described below.</p>
-                <ul>
-                    <li>Upload the map file that you want to transform (Note: must be either in an SVG or GeoJSON file format). </li>
-                    <li>Upload the file containing the corresponding data points for that map file (Note: must be a CSV file).</li>
-                    <li>Select continue at the bottom of this page.</li>
-                    <li> This will display a preview of your uploaded map file. If you like the preview you can then select continue
-                        or back if not. The system will then compute the cartogram using the Gastner-Newman algorithm.
-                    </li>
-                    <li>The system similarly to the previous step will preview the cartogram it has created.</li>
-                    <li>If you like what you see, click download to download the file </li>
-                    <li>Select return to return back to this page.</li>
-                </ul>
-            </div>
+<body onload="init(1)" onresize="init(0)">
 
-            <div id="fileUpload">
-                <form action="fileUpload" method="POST" enctype="multipart/form-data">
-                    <h1> Upload map file. </h1>
+	<div id="header" class="header">
+		<a class="logo">B-Cart</a>
+		<div class="header-right">
+			<a id="bold" href="/">Home</a>
+			<a href="/buildCart">Build Cartogram</a>
+			<a href="/cartUse">Use of Cartograms</a>
+			<a href="/resources"> Resources </a>
+		</div>
+	</div>
 
-                    <input type="file" name="mapfiletoupload" accept=".svg"> <br>
+	<div class="gallery" id="gallery">
+		<a href="#" class="previous" id="previous" onclick="translatePictureLeft()">&#8249;</a>
+		<a href="#" class="next" id="next" onclick="translatePictureRight()">&#8250;</a>
+		<img id ="init" class="opaque" src="images/cartogramBuildImage.png"/>
+		<img src="images/instructionsImage.png"/>
+		<img src="images/cartogramInfoImage.png"/>
+	</div> 
 
-                    <h1> Upload data. </h1>
-
-                    <input type="file" name="datafiletoupload" accept=".csv"> <br>
-                    <input type="submit">
-                    <p id="status"> {{status}} </p>
-                </form>
-            </div>
-        </div>
-    </body>
+	<p id="gallery_controls">
+		<button class = "selected" id="pic1" type="button"></button>
+		<button id="pic2" type="button"></button>
+		<button id="pic3" type="button"></button>
+	</p>
+	
+</body>
 </html>
