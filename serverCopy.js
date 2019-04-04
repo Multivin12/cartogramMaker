@@ -4,10 +4,8 @@ const ArrayList = require('arraylist');
 const app = express();
 //this is how to use express in conjunction with socket.io
 const server = app.listen("3000");
-//This library is used to make sections of code run synchronously
-var async = require("async");
 //the library to send events onto client side javascript
-const io = require('socket.io').listen(server);
+const io = require('socket.io')(server,{'pingInterval': 20000, 'pingTimeout': 5000000});
 //passing template variables into html
 const nunjucks = require('nunjucks');
 //formidable is for handling file uploads
@@ -33,8 +31,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 30;
-var ysize = 30;
+var xsize = 50;
+var ysize = 50;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -80,7 +78,6 @@ app.post('/fileUpload',(req,res) =>{
                 errorMessage += "Map file not present or file type not supported.";
             } else {
                 file.path = __dirname + '/uploads/' + "mapFile.svg";
-                mapFileName = file.path;
                 success = true;
             }
         }
@@ -133,7 +130,7 @@ app.get("/downloadMap",(req,res) => {
 })
 
 app.get("/downloadCart",(req,res) => {
-    var file = path.join(__dirname + '/cartogram.svg');
+    var file = path.join(__dirname + '/cartogramFile.svg');
     res.download(file,'cartogram.svg');
 })
 
@@ -220,7 +217,6 @@ function calculateDensities(svgLoad) {
         }
     }
 
-
     //Now need to change the value stored in the hashmap to be the density for that region.
 
     //Density is defined as the data value for a certain region divided by it's original area.
@@ -235,7 +231,7 @@ function calculateDensities(svgLoad) {
             area = 1;
         }
 
-        var densityValue = popValue/area;
+        var densityValue = popValue;
 
         if(isNaN(densityValue)){
             console.log("WARNING: DATA VALUE MISSING FOR MAP REGION NAME: " + region.name);
@@ -266,7 +262,6 @@ function createDensityGrid(densityHashMap) {
     //This is the density grid to be passed into the algorithm
     var densityGrid = DCT2.initialize2DArray(xsize,ysize);
     
-
     for(var i=0;i<grid.gridSquares.length;i++) {
         for(var j=0;j<grid.gridSquares[i].length;j++) {
             //now for each grid square calculate a certain density
@@ -280,21 +275,19 @@ function createDensityGrid(densityHashMap) {
                 
                 var curPercentTotal = grid.gridSquares[i][j].getPercentage(svgLoader.map.regions.get(k));
                 percentTotal += curPercentTotal;
-                densityTotal += curPercentTotal*densityHashMap.get(svgLoader.map.regions.get(k).name);
+                densityTotal += curPercentTotal*densityHashMap.get(svgLoader.map.regions.get(k).name)/densityHashMap.get("Sea");
 
-                console.log(k,svgLoader.map.regions.length);
             }
 
             //to add in the sea part of a grid square
             
             if(percentTotal ===0) {
-                densityGrid[i][j] = densityHashMap.get("Sea");
+                densityGrid[i][j] = densityHashMap.get("Sea")/densityHashMap.get("Sea");
             } else {
                 densityGrid[i][j] = densityTotal;
             }
 
-            console.log(j,grid.gridSquares[i].length);
-
+            console.log(j+i*grid.gridSquares[i].length);
             //densityGrid [i][j] += (1-percentTotal)*densityHashMap.get("Sea");
         }
     }
@@ -344,10 +337,10 @@ function updateCoordinates(newGridPoints) {
 
 console.log("Running at Port 3000");
 
+
 //Event listeners
 io.on('connection', function(socket){
     console.log('User Connected');
-
     //list of events to listen to from the client:
 
     //For when the client side javascipt needs the data from the CSV file on buildCart2.html
@@ -377,6 +370,7 @@ io.on('connection', function(socket){
     socket.on("buildDensityGrid",(data) => {
         var densityHashMap = data;
         var densityGrid = createDensityGrid(densityHashMap);
+        console.log(densityGrid);
         io.emit("builtDensityGrid",(densityGrid));
     })
 

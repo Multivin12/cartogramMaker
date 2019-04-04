@@ -150,7 +150,6 @@ class SVGLoader {
                     regionData = regionData.replaceAt(indices[j],",");
                     doReplace = true;
                 }
-                console.log(j);
                 j++;
             }   
             
@@ -253,7 +252,14 @@ class SVGLoader {
                 
             }
 
+            var divider = 1;
+            if(coordinateArray.length > 10000) {
+                divider = parseInt(Math.round(coordinateArray.length/10000));
+            }
+
+            var count = 0;
             for(var j=0;j<coordinateArray.length;j++) {
+
 
                 var isEnd = false;
                 //nextj is just for telling the loop which index to go to next.
@@ -268,6 +274,16 @@ class SVGLoader {
                 var drawChar = coordinateArray[j][0];
 
                 var newCoordinate = new SVGCoordinate(drawChar,parseFloat(xycoordinate[0]*ScaleX),parseFloat(xycoordinate[1]*ScaleY),isEnd);
+                //to roughly remove coordinates of very large SVG 
+                //as a very accuracte SVG will slow down the algorithm heavily
+                if(newCoordinate.drawChar === "M" || newCoordinate.ZPresent) {
+                    newRegion.addCoordinate(newCoordinate);
+                } else {
+                    count++;
+                }
+                if(count%divider === 0) {
+                    newRegion.addCoordinate(newCoordinate);
+                }
                 newRegion.addCoordinate(newCoordinate);
                 j = nextj;
             }
@@ -343,16 +359,16 @@ class SVGLoader {
         //draw the vertical grids
         for(var i=0;i<xsize;i++) {
             context.beginPath();
-            context.moveTo(i*scaleX*ScaleX,0);
-            context.lineTo(i*scaleX*ScaleX,this.map.ysize*ScaleY);
+            context.moveTo(i*scaleX,0);
+            context.lineTo(i*scaleX,this.map.ysize);
             context.stroke();
         }
 
         //draw the horizontal grids
         for(var i=0;i<ysize;i++) {
             context.beginPath();
-            context.moveTo(0,i*scaleY*ScaleY);
-            context.lineTo(this.map.xsize*ScaleX,i*scaleY*ScaleY);
+            context.moveTo(0,i*scaleY);
+            context.lineTo(this.map.xsize,i*scaleY);
             context.stroke();
         }
         */
@@ -391,6 +407,9 @@ class SVGLoader {
                 
             }
             svg += '">\n';
+            svg += '<name>';
+            svg += regions.get(i).name;
+            svg += '</name>\n';
             svg += '</path>\n';
         }
         svg += '</svg>\n';

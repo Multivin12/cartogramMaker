@@ -40,9 +40,13 @@ socket.on("gatheredData", (data) => {
 socket.on("builtDensityArray" ,(data) => {
     var progressBar = $(".progress-bar");
     var label = $("#Info");
+    var label2 = $("#Error");
 
     label.empty();
-    label.append("Status: Calculating density grid.")
+    label.append("Status: Calculating density grid.");
+
+    label2.empty();
+    label2.append("Please be patient, this might take a while.");
 
     var i = 20;
 
@@ -53,12 +57,25 @@ socket.on("builtDensityArray" ,(data) => {
     socket.emit("buildDensityGrid",data);
 })
 
+socket.on('disconnect', (reason) => {
+    alert("disconnected");
+    alert(reason);
+    if (reason === 'io server disconnect') {
+      // the disconnection was initiated by the server, you need to reconnect manually
+      socket.connect();
+    }
+    // else the socket will automatically try to reconnect
+});
+
 socket.on("builtDensityGrid",(data) =>{
     var progressBar = $(".progress-bar");
     var label = $("#Info");
+    var label2 = $("#Error");
 
     label.empty();
     label.append("Status: Running Algorithm.")
+    label2.empty();
+    label2.append("Please be patient, this might take a while.");
 
     var i = 40;
 
@@ -71,9 +88,11 @@ socket.on("builtDensityGrid",(data) =>{
 socket.on("Ran algorithm",(data) => {
     var progressBar = $(".progress-bar");
     var label = $("#Info");
+    var label2 = $("#Error");
 
     label.empty();
     label.append("Status: Updating Grid Points.")
+    label2.empty();
 
     var i = 75;
 
@@ -86,9 +105,11 @@ socket.on("Ran algorithm",(data) => {
 socket.on("Updated points",(data) => {
     var progressBar = $(".progress-bar");
     var label = $("#Info");
+    var label2 = $("#Error");
 
     label.empty();
     label.append("Status: Creating SVG File.")
+    label2.empty();
 
     var i = 95;
 
@@ -102,9 +123,11 @@ socket.on("Finished!",() => {
     var progressBar = $(".progress-bar");
     var label = $("#Info");
     var button = $(".btn.btn-primary")
+    var label2 = $("#Error");
 
     label.empty();
     label.append("Status: Finished!")
+    label2.empty();
 
     var i = 100;
 
