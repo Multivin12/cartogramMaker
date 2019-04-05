@@ -31,8 +31,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 50;
-var ysize = 50;
+var xsize = 100;
+var ysize = 100;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -97,13 +97,17 @@ app.post('/fileUpload',(req,res) =>{
     form.on('end', () => {
 
         if(success) {
-            
-            svgLoader.readSVGFile("/../uploads/mapFile.svg");
-            svgLoader.collectMapData();
-            
-            //xsize and ysize passed for drawing the grid just tp get a visualization
-            svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
-            svgLoader.drawMapToSVG(path.join(__dirname + '/public/images/map.svg'));
+            try{
+                svgLoader.readSVGFile("/../uploads/mapFile.svg");
+                svgLoader.collectMapData();
+                
+                //xsize and ysize passed for drawing the grid just tp get a visualization
+                svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
+                svgLoader.drawMapToSVG(path.join(__dirname + '/public/images/map.svg'));
+            }catch(err) {
+                res.render(__dirname + '/views/buildCart.html');
+                io.emit('Error',err);
+            }
             res.render(__dirname + '/views/buildCart2.html');
         } else {
             if(success == null) {
@@ -226,15 +230,15 @@ function calculateDensities(svgLoad) {
         var region = svgLoad.map.regions.get(i);
         var popValue = dataInfo.get(region.name);
 
-        var area = region.getArea();
-        if(area === 0) {
-            area = 1;
-        }
 
         var densityValue = popValue;
 
         if(isNaN(densityValue)){
             console.log("WARNING: DATA VALUE MISSING FOR MAP REGION NAME: " + region.name);
+            var area = region.getArea();
+            if(area === 0) {
+                area = 1;
+            }
             densityValue = area;
         }
         densityInfo.set(region.name,densityValue);
@@ -276,7 +280,9 @@ function createDensityGrid(densityHashMap) {
                 var curPercentTotal = grid.gridSquares[i][j].getPercentage(svgLoader.map.regions.get(k));
                 percentTotal += curPercentTotal;
                 densityTotal += curPercentTotal*densityHashMap.get(svgLoader.map.regions.get(k).name)/densityHashMap.get("Sea");
-
+                if(percentTotal >= 1) {
+                    break;
+                }
             }
 
             //to add in the sea part of a grid square

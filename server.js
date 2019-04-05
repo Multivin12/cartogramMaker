@@ -96,15 +96,15 @@ function calculateDensities() {
         var region = svgLoader.map.regions.get(i);
         var popValue = dataInfo.get(region.name);
 
-        var area = region.getArea();
-        if(area === 0) {
-            area = 1;
-        }
 
-        var densityValue = popValue/area;
+        var densityValue = popValue;
 
         if(isNaN(densityValue)){
             console.log("WARNING: DATA VALUE MISSING FOR MAP REGION NAME: " + region.name);
+            var area = region.getArea();
+            if(area === 0) {
+                area = 1;
+            }
             densityValue = area;
         }
         densityInfo.set(region.name,densityValue);
@@ -144,20 +144,21 @@ function createDensityGrid(densityHashMap) {
                 
                 var curPercentTotal = grid.gridSquares[i][j].getPercentage(svgLoader.map.regions.get(k));
                 percentTotal += curPercentTotal;
-                densityTotal += curPercentTotal*densityHashMap.get(svgLoader.map.regions.get(k).name);
-
-                console.log(k,svgLoader.map.regions.length);
+                densityTotal += curPercentTotal*densityHashMap.get(svgLoader.map.regions.get(k).name)/densityHashMap.get("Sea");;
+                if(percentTotal >= 1) {
+                    break;
+                }
             }
 
             //to add in the sea part of a grid square
             
             if(percentTotal ===0) {
-                densityGrid[i][j] = densityHashMap.get("Sea");
+                densityGrid[i][j] = densityHashMap.get("Sea")/densityHashMap.get("Sea");;
             } else {
                 densityGrid[i][j] = densityTotal;
             }
 
-            console.log(j,grid.gridSquares[i].length);
+            console.log(j+i*grid.gridSquares[i].length);
 
             //densityGrid [i][j] += (1-percentTotal)*densityHashMap.get("Sea");
         }
