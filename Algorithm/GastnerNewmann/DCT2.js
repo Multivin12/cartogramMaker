@@ -1,9 +1,13 @@
+var lib = require("ml-fft");
+var FFT = lib.FFT;
+var FFTUtils = lib.FFTUtils
+
 class DCT2{
 
     //Performs the 2D dct taking a 2D array as input
     //Code taken from https://stackoverflow.com/questions/13491895/matlab-create-my-own-dct2
     static performDCT2(_2DArray) {
-
+        /*
         var M = DCT2.getNoOfRows(_2DArray);
         var N = DCT2.getNoOfColumns(_2DArray);
 
@@ -41,13 +45,42 @@ class DCT2{
                 }
                 output[p][q] = final;
             }
+        }*/
+
+        var nRows = DCT2.getNoOfRows(_2DArray);
+        var nCols = DCT2.getNoOfColumns(_2DArray);
+
+        var data = new Array(nRows*nCols);
+        for(var i=0;i<nRows;i++){
+            for(var j=0;j<nCols;j++){
+                data[i*nCols+j]=_2DArray[i][j];
+            }
         }
+
+        var ftData = FFTUtils.fft2DArray(data, nCols,nRows);
+
+        var inc = 0;
+        var output = [];
+
+        for(var x = 0; x < nCols; x++) {
+            output[x] = [ ];
+            for(var y = 0; y < nRows; y++) {
+                if(y >= (nRows /2 + 1)) {
+                    output[x][y] = 0;
+                } else {
+                    output[x][y] = ftData[inc];
+                    inc++;
+                }
+            }
+            inc += nRows/2+1;
+        } 
+
         return output;
     }
 
     //Performs the 2D idct taking a 2D array as input
     static performiDCT2(_2DArray) {
-
+        /*
         var M = DCT2.getNoOfRows(_2DArray);
         var N = DCT2.getNoOfColumns(_2DArray);
         var output = DCT2.initialize2DArray(M,N);
@@ -84,7 +117,54 @@ class DCT2{
                 output[m][n] = final;
             }
         }
-        return output;
+        */
+
+        var nRows = DCT2.getNoOfRows(_2DArray);
+        var nCols = DCT2.getNoOfColumns(_2DArray);
+
+        var _1DArray = new Array(nRows*nCols);
+        for(var i=0;i<nRows;i++){
+            for(var j=0;j<nCols;j++){
+                _1DArray[j+i*nCols] = _2DArray[i][j];
+            }
+        }
+
+        
+        var data = new Array(nRows*2*(nCols/2+1));
+        var counter = 0;
+        var zeroFlag = false;
+        var inc = 0;
+
+        for(var i=0;i<data.length;i++){
+            if(counter == (nCols/2+1)) {
+                if(zeroFlag) {
+                    zeroFlag = false;
+                } else {
+                    zeroFlag = true;
+                }
+                counter = 0;
+                inc+=1;
+            }
+
+            if(!zeroFlag) {
+                data[i] = _1DArray[i-inc];
+            } else {
+                data[i] = 0;
+            }
+            counter++;
+        }
+
+        var iftData = FFTUtils.ifft2DArray(data,nRows*2,nCols/2+1);
+
+        var output = [];
+        for(var i=0;i<nRows;i++) {
+            output[i] = [];
+            for(var j=0;j<nCols;j++) {
+                output[i][j] = iftData[j+i*nCols];
+            }
+        }
+
+        return output;        
     }
 
     //This method is used for getting the number of rows in a 2D Array
@@ -142,10 +222,19 @@ class DCT2{
         for(var x = 0; x < i; x++) {
             _2DArray[x] = [ ];
             for(var y = 0; y < j; y++) {
-                _2DArray[x][y] = 0;
+                _2DArray[x][y] = x*j+y + 1;
             }
         } 
         return _2DArray; 
     }
 }
+/*
+var _2DArray = DCT2.initialize2DArray(4,8);
+
+console.log(_2DArray);
+
+var output = DCT2.performiDCT2(_2DArray);
+
+console.log(output);
+*/
 module.exports = DCT2;

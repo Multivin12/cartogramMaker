@@ -31,8 +31,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 100;
-var ysize = 100;
+var xsize = 32;
+var ysize = 32;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -231,7 +231,7 @@ function calculateDensities(svgLoad) {
         var popValue = dataInfo.get(region.name);
 
 
-        var densityValue = popValue;
+        var densityValue = popValue/area;
 
         if(isNaN(densityValue)){
             console.log("WARNING: DATA VALUE MISSING FOR MAP REGION NAME: " + region.name);
