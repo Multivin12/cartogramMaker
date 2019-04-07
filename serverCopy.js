@@ -231,7 +231,7 @@ function calculateDensities(svgLoad) {
         var popValue = dataInfo.get(region.name);
 
 
-        var densityValue = popValue/area;
+        var densityValue = popValue;
 
         if(isNaN(densityValue)){
             console.log("WARNING: DATA VALUE MISSING FOR MAP REGION NAME: " + region.name);
