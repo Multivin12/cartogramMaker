@@ -522,7 +522,7 @@ class Region {
             arrCoordinates[i] = new Coordinate(x,y);
 
             //If the Z is present means it is the end of the polygon
-            if(this.coordinates.get(i).ZPresent) {
+            if(this.coordinates.get(i).ZPresent || this.coordinates.get(i+1).drawChar === 'M') {
                 //Since this is the end you then calculate the area
                 var currentArea = 0;
 

@@ -31,8 +31,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 32;
-var ysize = 32;
+var xsize = 4;
+var ysize = 4;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -229,27 +229,30 @@ function calculateDensities(svgLoad) {
     for(var i=0;i<svgLoad.map.regions.length;i++) {
         var region = svgLoad.map.regions.get(i);
         var popValue = dataInfo.get(region.name);
-
-
         var densityValue = popValue;
 
         if(isNaN(densityValue)){
-            console.log("WARNING: DATA VALUE MISSING FOR MAP REGION NAME: " + region.name);
-            var area = region.getArea();
-            if(area === 0) {
-                area = 1;
-            }
-            densityValue = area;
+            densityValue = 0;
         }
-        densityInfo.set(region.name,densityValue);
 
         totalDensityValue += densityValue;
     }
 
     var meanDensityValue = totalDensityValue/svgLoad.map.regions.length;
 
-    densityInfo.set("Sea",meanDensityValue);
+    densityInfo.set("Sea",1.0);
 
+    for(var i=0;i<svgLoad.map.regions.length;i++) {
+        var region = svgLoad.map.regions.get(i);
+        var popValue = dataInfo.get(region.name);
+
+        if(popValue === 0 ) {
+            popValue = 1.0;
+        }
+        console.log(popValue/meanDensityValue)
+
+        densityInfo.set(region.name,popValue/meanDensityValue);
+    }
     return densityInfo;
 }
 
@@ -279,7 +282,7 @@ function createDensityGrid(densityHashMap) {
                 
                 var curPercentTotal = grid.gridSquares[i][j].getPercentage(svgLoader.map.regions.get(k));
                 percentTotal += curPercentTotal;
-                densityTotal += curPercentTotal*densityHashMap.get(svgLoader.map.regions.get(k).name)/densityHashMap.get("Sea");
+                densityTotal += curPercentTotal*densityHashMap.get(svgLoader.map.regions.get(k).name);
                 if(percentTotal >= 1) {
                     break;
                 }
@@ -288,7 +291,7 @@ function createDensityGrid(densityHashMap) {
             //to add in the sea part of a grid square
             
             if(percentTotal ===0) {
-                densityGrid[i][j] = densityHashMap.get("Sea")/densityHashMap.get("Sea");
+                densityGrid[i][j] = densityHashMap.get("Sea");
             } else {
                 densityGrid[i][j] = densityTotal;
             }
