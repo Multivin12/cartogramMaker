@@ -554,7 +554,7 @@ class Region {
         var subRegion = new Region();
         for(var i=0;i<this.coordinates.length;i++) {
             subRegion.addCoordinate(this.coordinates.get(i));
-            if(this.coordinates.get(i).ZPresent) {
+            if(this.coordinates.get(i).ZPresent || this.coordinates.get(i+1).drawChar === 'M') {
                 subRegions.add(subRegion);
                 subRegion = new Region();
             }

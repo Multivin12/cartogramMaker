@@ -31,8 +31,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 4;
-var ysize = 4;
+var xsize = 64;
+var ysize = 64;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -379,7 +379,6 @@ io.on('connection', function(socket){
     socket.on("buildDensityGrid",(data) => {
         var densityHashMap = data;
         var densityGrid = createDensityGrid(densityHashMap);
-        console.log(densityGrid);
         io.emit("builtDensityGrid",(densityGrid));
     })
 
