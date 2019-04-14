@@ -31,8 +31,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 64;
-var ysize = 64;
+var xsize = 32;
+var ysize = 32;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -104,11 +104,11 @@ app.post('/fileUpload',(req,res) =>{
                 //xsize and ysize passed for drawing the grid just tp get a visualization
                 svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
                 svgLoader.drawMapToSVG(path.join(__dirname + '/public/images/map.svg'));
+                res.render(__dirname + '/views/buildCart2.html');
             }catch(err) {
+                io.emit('Error',err.message);
                 res.render(__dirname + '/views/buildCart.html');
-                io.emit('Error',err);
             }
-            res.render(__dirname + '/views/buildCart2.html');
         } else {
             if(success == null) {
                 res.render(__dirname + '/views/buildCart.html');
@@ -190,6 +190,8 @@ function calculateDensities(svgLoad) {
         svgLoad.map.regions.get(i).coordinates = Object.assign(new ArrayList,svgLoad.map.regions.get(i).coordinates);
     }
 
+    
+
     //An array for storing the areas of every region in the map
     var areas = new Array(svgLoad.map.regions.length);
 
@@ -204,6 +206,7 @@ function calculateDensities(svgLoad) {
 
     //to remove all newline characters in a string
     var dataArray = data.split("\r\n");
+
 
     //need to put all the data into a hashmap with key the Region name and population the value.
     var dataInfo = new HashMap();
@@ -220,7 +223,6 @@ function calculateDensities(svgLoad) {
             throw new Error("Data File corrupted. Index: " + i);
         }
     }
-
     //Now need to change the value stored in the hashmap to be the density for that region.
 
     //Density is defined as the data value for a certain region divided by it's original area.
@@ -234,7 +236,6 @@ function calculateDensities(svgLoad) {
         if(isNaN(densityValue)){
             densityValue = 0;
         }
-
         totalDensityValue += densityValue;
     }
 
@@ -245,11 +246,9 @@ function calculateDensities(svgLoad) {
     for(var i=0;i<svgLoad.map.regions.length;i++) {
         var region = svgLoad.map.regions.get(i);
         var popValue = dataInfo.get(region.name);
-
-        if(popValue === 0 ) {
+        if(popValue === 0 || typeof(popValue) === "undefined") {
             popValue = 1.0;
         }
-        console.log(popValue/meanDensityValue)
 
         densityInfo.set(region.name,popValue/meanDensityValue);
     }

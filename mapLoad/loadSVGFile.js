@@ -40,7 +40,6 @@ class SVGLoader {
         var json = null;
         
         var data = fs.readFileSync(path.join(__dirname + filePath));
-        
         parser.parseString(data, (err, result) => {
             if(err){
                 console.log(err);
@@ -71,14 +70,16 @@ class SVGLoader {
             throw new Error("File Load Error: File Corrupted. Read SVG in browser for more information.");
         }
 
+        //to remove the preceding g tags
         if(typeof(regions) === "undefined") {
-            throw new Error("File Load Error: The next tag after svg should be the path tag for the first region.");
+            var temp = this.JSONData.svg.g[0];
+            this.JSONData.svg = temp;
+            var regions = this.JSONData.svg.path;
         }
 
         //This part is to find regions enclosed in <g> tags
         //and add these to the set of regions to be loaded
         var currentElement = this.JSONData.svg.g;
-        
         //test if the document actually has any g tags
         if(typeof(currentElement) !== "undefined") {
             var listToEvaluate = new Queue();
@@ -86,7 +87,6 @@ class SVGLoader {
             for(var i=0;i<currentElement.length;i++) {
                 listToEvaluate.push(currentElement[i]);
             }
-
             //essentially an implemetation of the breadth first search
             //as DOM is a tree data structure.
             while(listToEvaluate.length !== 0) {
@@ -94,13 +94,15 @@ class SVGLoader {
 
                 //if this happens it's not a region element
                 if(typeof(currentElement.path) === "undefined") {
-                    
                     var childElements = currentElement.g;
 
-                    for(var i=0;i<childElements.length;i++) {
-                        listToEvaluate.push(childElements[i]);
+                    //Means there are no regions present in the g tag
+                    if(typeof(childElements) === "undefined") {
+                    } else {
+                        for(var i=0;i<childElements.length;i++) {
+                            listToEvaluate.push(childElements[i]);
+                        }
                     }
-
                 } else {
                     //else add it to the collection of regions
                     var jsonToAdd = currentElement.path[0];
@@ -173,22 +175,33 @@ class SVGLoader {
         for(var j=0;j<regions.length;j++) {
 
             var flag = false;
+            var flag2 = false;
 
             try{
                 currentRegionName = regions[j].name[0]._;
             } catch(err) {
-                //Means the region has no name at all
-                //therefore add the name of the previous region to this one.
-                this.JSONData.svg.path[j].name = currentRegionName;
-                flag = true;
+                if(typeof(regions[j].desc) === "undefined") {
+                    //Means the region has no name at all
+                    //therefore add the name of the previous region to this one.
+                    this.JSONData.svg.path[j].name = currentRegionName;
+                    flag = true;
+                } else {
+                    currentRegionName = regions[j].desc[0].name;
+                    flag2 = true;
+                }
             }
+            
             
             if(!flag) {
                 //Means regionName has an id attribute
                 if(typeof(currentRegionName) === "string") {
                     this.JSONData.svg.path[j].name = [regions[j].name[0]._];
                 } else {
-                    this.JSONData.svg.path[j].name = [regions[j].name[0]];
+                    if(flag2) {
+                        this.JSONData.svg.path[j].name = [regions[j].desc[0].name[0]];
+                    } else {
+                        this.JSONData.svg.path[j].name = [regions[j].name[0]];
+                    }
                 }
                 currentRegionName = this.JSONData.svg.path[j].name;
             }
@@ -207,7 +220,7 @@ class SVGLoader {
         if(this.JSONData.svg.path[numRegions-1].name == null) {
             throw new Error("Reached end of file with no name info present.");
         }
-        //console.log(this.JSONData.svg.path[0]['$'].d);
+
     }
 
     /**
@@ -219,8 +232,9 @@ class SVGLoader {
         } 
 
         //Gather the height and width of the map file
-        var height = this.JSONData.svg["$"].height;
-        var width = this.JSONData.svg["$"].width;
+        var height = 700;//this.JSONData.svg["$"].height;
+        var width = 700;//this.JSONData.svg["$"].width;
+
 
         this.map = new Map(parseFloat(height),parseFloat(width));
 
@@ -228,6 +242,7 @@ class SVGLoader {
         var arrayOfRegions = null;
         
         arrayOfRegions = this.JSONData.svg.path;
+
 
         var ScaleX = canvasSizeX / this.map.ysize;
         var ScaleY = canvasSizeY / this.map.xsize;
