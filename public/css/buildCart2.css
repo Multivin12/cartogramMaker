@@ -5,46 +5,41 @@ html {
   width: 100%;
   margin: 0;
 }
+#main {
+    text-align:center;
+}
 #bold{
     font-weight:bold;
 }
 #navigator {
-    position: absolute;
+    position: relative;
     font-size:25px;
-    top:100px;
-    left:30%;
-    right:30%;
-    width:60%;
+    top:0px;
 }
 #navigator a{
     text-decoration: none;
 }
 img {
-    position: absolute;
-    top:240px;
-    left:35vw;
+    position:relative;
+    top:10px;
     height:300px;
     width:300px;
 }
-.btn.btn-primary {
-    position:absolute;
-    left:52.5vw;
-    bottom:0px;
+.btn.btn-primary{
+    position:relative;
+    top:10px;
 }
 table {
+    position:relative;
+    top:10px;
+    margin: 0 auto;
     width:300px !important;
-    position:absolute;
-    top:240px;
-    left:35vw;
 }
 .table th,.table td{
     padding:0px !important;
 }
 /*CSS for the tab buttons*/
 .btn.btn-outline-success{
-    position:relative;
-    left:36vw;
-    top:100px;
     padding-left:50px;
     padding-right:50px;
     border-color:#262626;

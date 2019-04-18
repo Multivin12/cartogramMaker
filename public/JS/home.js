@@ -1,13 +1,4 @@
-/*
-Handling events and data sent from node server - NOTE: must include <script src='/socket.io/socket.io.js'></script>
-in html file before this file's import.
 
-var socket = io();
-
-socket.on('Catrina', (data) => {
-	alert(data);
-})
-*/
 
 function init(status) {
 
@@ -137,16 +128,18 @@ function addHTML(imgIndex) {
 			break;
 		case 1:
 			$("#picInfo").append(h1);
-			$("#picInfo h1").append("Not sure where to start?");
+			$("#picInfo h1").append("Resources Used");
 
 			$("#picInfo").append(p);
-			$("#picInfo p").append("Click here to read over the instructions.");
+			$("#picInfo p").append("This Software uses Gastner and Newman's algorithm" +
+			" to produce a cartogram.");
 
 			$("#picInfo").append(a);
-			$("#picInfo a").attr("href","/buildCart");
+			$("#picInfo a").attr("href","/resources");
 
-			$("#picInfo a").append($("<button/>").attr("style","position:absolute;z-index:5;").append("Instructions"));
+			$("#picInfo a").append($("<button/>").attr("style","position:absolute;z-index:5;").append("Resources"));
 			$("#picInfo button").attr("class","btn btn-primary");
+			$("#picInfo button").attr("id","cartogramUse");
 			break;
 		default:
 			$("#picInfo").append(h1);

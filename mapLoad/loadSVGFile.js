@@ -116,7 +116,6 @@ class SVGLoader {
         //Now need to format the path attribute string
         for(var i=0;i<regions.length;i++) {
             var regionData = regions[i]['$'].d;
-
             //String replace prototype function
             String.prototype.replaceAt=function(index, replacement) {
                 return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
@@ -126,10 +125,6 @@ class SVGLoader {
                 throw new Error("SVG Path can only contain Line Segments (L), Circular lines(C), Move to (M) or Close path (Z) Characters. Path Attribute Number= " + i +".");
             }
 
-            
-            if(regionData.match(/[Cc]+/)) {
-                console.log("WARNING: CURVES DETECTED FOR REGION " + i + " PLEASE WAIT.");
-            }
             //Need to convert the circular paths to line segments.
             //Firstly find the index of all C chars
             var regex = /(?<=[0-9])(\s|[Cc]|[Mm]|[Ll])(?=[0-9])/g, result, indices = [];
@@ -232,8 +227,8 @@ class SVGLoader {
         } 
 
         //Gather the height and width of the map file
-        var height = 700;//this.JSONData.svg["$"].height;
-        var width = 700;//this.JSONData.svg["$"].width;
+        var height = this.JSONData.svg["$"].height;
+        var width = this.JSONData.svg["$"].width;
 
 
         this.map = new Map(parseFloat(height),parseFloat(width));
@@ -247,7 +242,6 @@ class SVGLoader {
         var ScaleX = canvasSizeX / this.map.ysize;
         var ScaleY = canvasSizeY / this.map.xsize;
 
-        
         for(var i=0;i<arrayOfRegions.length;i++) {
             //get the element corresonding to the coordinates of the region
             var coordinateString = arrayOfRegions[i]["$"].d;
@@ -334,10 +328,8 @@ class SVGLoader {
 
         //Draw the map
         for(var i=0;i<this.map.regions.length;i++) {
-            var colour = this.map.regions.get(i).colour;
-            if(colour === null) {
-                context.fillStyle = 'orange';
-            }
+
+            context.fillStyle = 'orange';
             context.beginPath();
             for(var j=0;j<this.map.regions[i].coordinates.length;j++) {
 

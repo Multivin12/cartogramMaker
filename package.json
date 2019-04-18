@@ -4,6 +4,7 @@
   "description": "",
   "main": "server.js",
   "dependencies": {
+    "alert-node": "^1.2.3",
     "arraylist": "^0.1.0",
     "async": "^2.6.2",
     "canvas": "^2.0.1",

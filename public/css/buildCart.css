@@ -1,7 +1,6 @@
 body,
 html {
   height: 100%;
-  min-height:100%;
   width: 100%;
   margin: 0;
 }
@@ -9,48 +8,39 @@ html {
     font-weight:bold;
 }
 #navigator {
-    position: absolute;
+    text-align:center;
+    position: relative;
     font-size:25px;
-    top:100px;
-    left:30%;
-    right:30%;
-    width:60%;
+    top:0px;
 }
 #navigator a{
     text-decoration: none;
 }
 /*CSS for the instructions section */
-#instructions{
-    position: absolute;
-    top:180px;
-    left:20%;
-    right:40%;
+#rest{
+    float: left;
+    position: relative;
+    left: 50%;
+    width:40%;
 }
-#fileUploadInst{
-    position:relative;
-    top:20px;
+#instructions{
+    float: left;
+    position: relative;
+    left: -50%;
+}
+
+#fileUpload{
+    float: left;
+    position: relative;
+    left: -50%;
 }
 
 /*CSS for the file Upload section */
-#fileUpload{
-    position:absolute;
-    top:450px;
-    left:20%;
-    font-size:25px;
-    width:60vw;
-    height:210px;
-}
-
-#dataButtonTemplate{
-    position: relative;
-    left:25%;
-    bottom:175px;
-}
 #dataButtonUpload{
+    position:relative;
+    left:5em;
     border-color:#262626;
     color:#262626 !important;
-    position: absolute;
-    left:35vw;
     background-color:white;
 }
 #dataButtonUpload:hover{
@@ -59,16 +49,11 @@ html {
 #dataButtonUpload:not(:disabled):not(.disabled):focus{
     box-shadow: 0 0 8px #262626;
 }
-#mapButtonTemplate{
-    position: relative;
-    left:25%;
-    bottom:175px;
-}
 #mapButtonUpload{
+    position:relative;
+    left:5em;
     border-color:#262626;
     color:#262626;
-    position: absolute;
-    left:35vw;
     background-color:white;
 }
 /*To override the color surrounding the button*/
@@ -79,7 +64,7 @@ html {
     background-color:#d9d9d9;
 }
 #next{
-    position: absolute;
-    left:35vw;
-    bottom:8px;
+    position:relative;
+    left:9.3em;
+    bottom:5px;
 }

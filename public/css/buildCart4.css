@@ -5,57 +5,51 @@ html {
   width: 100%;
   margin: 0;
 }
+#main{
+    text-align:center;
+}
 #bold{
     font-weight:bold;
 }
 #navigator {
-    position: absolute;
+    text-align:center;
+    position: relative;
     font-size:25px;
-    top:100px;
-    left:30%;
-    right:30%;
-    width:60%;
+    top:0px;
 }
 #navigator a{
     text-decoration: none;
 }
 /*Main section i.e not the header or the nav bar*/
 #cartButton{
-    position:absolute;
-    top:90%;
-    left:52%;
+    position:relative;
+    left:2em;
 }
 #mapButton{
-    position:absolute;
-    top:90%;
-    left:27%;
-}
-h1{
-    position:absolute;
-    top:25%;
-    left:20%;
+    position:relative;
+    top:12.8em;
+    right:21em;
 }
 #mapTitle{
-    position: absolute;
-    top:35%;
-    left:30%;
+    position:relative;
+    left:-8em;
 }
 #cartogramTitle{
-    position: absolute;
-    top:35%;
-    left:55%;
+    position:relative;
+    bottom:14em;
+    margin-left:390px;
 }
 #map{
-    position:absolute;
-    left:23%;
-    top:40%;
+    position:relative;
+    right:6em;
     height:300px;
     width:300px;
 }
 #cartogram{
-    position:absolute;
-    left:48%;
-    top:40%;
+    position:relative;
+    bottom:3.2em;
+    left:18em;
     height:300px;
     width:300px;
+    margin-top:-300px;
 }

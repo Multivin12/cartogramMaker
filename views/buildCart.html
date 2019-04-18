@@ -35,38 +35,56 @@
 			<p> <a href="/buildCart" id="bold">Begin</a> &#8594; Preview &#8594; Build &#8594; Download </p>
 		</div>
 
-		<div id="instructions">
-			<h1> Instructions </h1>
+		<div id="rest">
+			<div id="instructions">
+				<span id="fileUploadInst">
+					<h1> Instructions </h1>
 
-			<span id="fileUploadInst">
-				<h5> 1. File Upload</h5>
-				<p> First thing </p>
-				<h5> 2. Preview</h5>
-				<h5> 3. Build Cartogram</h5>
-				<h5> 4. Download Cartogram</h5> 
-			</span>
-
-			<button type="button" id="dataButtonTemplate" class="btn btn-success" hidden><span>Download CSV Template</span></button>
-			<button type="button" id="mapButtonTemplate" class="btn btn-success" hidden><span> Download SVG Template</span></button>
-		</div>
-
-		<div id="fileUpload">
-
-			<form action="fileUpload" method="POST" enctype="multipart/form-data">
-				<h1>File Upload</h1>
-				<p>Data File:
-					<input accept=".csv" id="myFile" name="datafiletoupload" type="file" style="position:absolute;left:-10000px;top:-10000px;">
-					<button onclick="$('#myFile').click();" type="button" id="dataButtonUpload" class="btn btn-outline-primary">Upload CSV File</button>
-				</p>
 				
-				<p>Map File:
-					<input accept=".svg" id="myFile2" name="mapfiletoupload" type="file" style="position:absolute;left:-10000px;top:-10000px;">
-					<button onclick="$('#myFile2').click();" type="button" id="mapButtonUpload" class="btn btn-outline-primary">Upload SVG File</button>
-				</p> 
+					<h5> 1. File Upload</h5>
+					<p> First step is to upload your SVG map file and CSV data file. A window will open where you can select which files to upload to the server. 
+						An example of the map file and data file that the system expects can be downloaded below.</p>
 
-				<input id="submit" type="submit" style="position:absolute;left:-10000px;top:-10000px;">
-				<button onclick="$('#submit').click();" type="submit" id="next" class="btn btn-primary">Next</button>
-			</form>
+						<div id="templateButtons">
+							<a href="/downloadDataTemp"><button type="button" id="dataButtonTemplate" class="btn btn-success"><span>Download CSV Template</span></button></a>
+							<a href="/downloadMapTemp"><button type="button" id="mapButtonTemplate" class="btn btn-success"><span> Download SVG Template</span></button></a>
+						</div>
+					<br>
+					<p>The CSV file has a very simple format. Each line has two elements that represent the name of the region and its desired
+						statistic. The SVG file has a more detailed requirement. Each region in the map file must have a name associated with it, if this is not the case 
+						the system will reject it. If a region in the map file doesn't have a data value associated with it, the region will remain the same in the resulting cartogram. For the 
+						d attribute, the system only supports C, L, M or Z characters, it will reject other characters. If a file does contain a C character,
+						its recommended using other software to convert the curves to line segments as it takes the system a substantial length of time to do this.
+					</p>
+
+					<p>Press Next to Continue!!</p>
+
+					<img src="images/fileUpload.PNG" >
+					<h5> 2. Preview</h5>
+					<h5> 3. Build Cartogram</h5>
+					<h5> 4. Download Cartogram</h5> 
+				</span>
+
+			</div>
+
+			<div id="fileUpload">
+
+				<form action="fileUpload" method="POST" enctype="multipart/form-data">
+					<h1>File Upload</h1>
+					<p>Data File:
+						<input accept=".csv" id="myFile" name="datafiletoupload" type="file" style="position:absolute;left:-10000px;top:-10000px;">
+						<button onclick="$('#myFile').click();" type="button" id="dataButtonUpload" class="btn btn-outline-primary">Upload CSV File</button>
+					</p>
+					
+					<p>Map File:
+						<input accept=".svg" id="myFile2" name="mapfiletoupload" type="file" style="position:absolute;left:-10000px;top:-10000px;">
+						<button onclick="$('#myFile2').click();" type="button" id="mapButtonUpload" class="btn btn-outline-primary">Upload SVG File</button>
+					</p> 
+
+					<input id="submit" type="submit" style="position:absolute;left:-10000px;top:-10000px;">
+					<button onclick="$('#submit').click();" type="submit" id="next" class="btn btn-primary">Next</button>
+				</form>
+			</div>
 		</div>
 	</div>	
 </body>

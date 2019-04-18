@@ -106,17 +106,3 @@ p button:focus {
 .logo{
   color:#b3b3b3 !important;
 }
-
-@media screen and (max-width: 700px) {
-
-   
-   #picInfo h1{
-    font-size:4.5vw;
-  }
-  #picInfo button{
-    font-size:3.5vw;
-  }
-  #picInfo p {
-    font-size:3.5vw;
-  }
-}
