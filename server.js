@@ -47,12 +47,12 @@ app.get('/buildCart',(req,res) => {
 
 //the cartogram uses page
 app.get('/cartUse',(req,res) => {
-    res.sendFile(path.join(__dirname+'/views/index.html'));
+    res.sendFile(path.join(__dirname+'/views/uses.html'));
 })
 
 //the resources page
 app.get('/resources',(req,res) => {
-    res.sendFile(path.join(__dirname+'/views/index.html'));
+    res.sendFile(path.join(__dirname+'/views/resources.html'));
 })
 
 app.get('/buildCart2',(req,res) => {

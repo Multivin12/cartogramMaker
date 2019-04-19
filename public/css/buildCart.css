@@ -27,6 +27,7 @@ html {
     float: left;
     position: relative;
     left: -50%;
+    width:80%;
 }
 
 #fileUpload{
@@ -34,7 +35,6 @@ html {
     position: relative;
     left: -50%;
 }
-
 /*CSS for the file Upload section */
 #dataButtonUpload{
     position:relative;
