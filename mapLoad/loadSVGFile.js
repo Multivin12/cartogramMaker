@@ -395,7 +395,7 @@ class SVGLoader {
         //Draw the grid
         //variables for scaling the grid number to the actual canvas coordinates
         //mainly for debugging purposes
-        
+        /*
         var scaleX = this.map.xsize / xsize;
         var scaleY = this.map.ysize / ysize;
 
@@ -417,7 +417,7 @@ class SVGLoader {
             context.lineTo(this.map.xsize,i*scaleY);
             context.stroke();
         }
-        
+        */
         
         //Save the canvas onto an external png file
         var out = fs.createWriteStream(filePath);
