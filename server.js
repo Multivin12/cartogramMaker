@@ -5,7 +5,7 @@ const app = express();
 //this is how to use express in conjunction with socket.io
 const server = app.listen("3000");
 //the library to send events onto client side javascript
-const io = require('socket.io')(server,{'pingInterval': 20000, 'pingTimeout': 5000000});
+const io = require('socket.io')(server,{'pingInterval': 20000000, 'pingTimeout': 500000000});
 //passing template variables into html
 const nunjucks = require('nunjucks');
 //formidable is for handling file uploads
@@ -100,10 +100,21 @@ app.post('/fileUpload',(req,res) =>{
             try{
                 svgLoader.readSVGFile("/../uploads/mapFile.svg");
                 svgLoader.collectMapData();
+
+                //check CSV file
+                var dataBuffer = fs.readFileSync(path.join(__dirname + "/uploads/dataFile.csv"));
+                var data = dataBuffer.toString();
+
+                if(checkCSVFile(data)) {
+                    //means the CSV file is okay
+                    //xsize and ysize passed for drawing the grid just tp get a visualization
+                    svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
+                    res.render(__dirname + '/views/buildCart2.html');
+                } else {
+                    io.emit('Error',err.message);
+                    res.render(__dirname + '/views/buildCart.html');
+                }
                 
-                //xsize and ysize passed for drawing the grid just tp get a visualization
-                svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
-                res.render(__dirname + '/views/buildCart2.html');
             }catch(err) {
                 io.emit('Error',err.message);
                 res.render(__dirname + '/views/buildCart.html');
@@ -147,6 +158,34 @@ app.get("/downloadDataTemp",(req,res) => {
     res.download(file,'dataTemplate.csv');
 })
 
+/**
+ * Function for checking that the CSV file uploaded is in the correct format.
+ * 
+ * @param {String} data 
+ */
+function checkCSVFile(data) {
+
+    var lines = data.split("\r\n");
+
+    for(var i=0;i<lines.length;i++) {
+
+        if(!lines[i].includes(",")) {
+            throw new Error("Error in datafile");
+        }
+        var elements = lines[i].split(",");
+
+        if (elements.length != 2) {
+            throw new Error("Must only have one comma for each line in datafile");
+        }
+
+
+        if(!(/^\d+$/.test(elements[1]))) {
+            throw new Error("Statistical value can only contain numbers.")
+        }
+    }
+    
+    return true;
+}
 function createSVGFile(svgLoad) {
 
     //assign everything to its correct object as javascript just converts it
@@ -260,8 +299,9 @@ function calculateDensities(svgLoad) {
         var popValue = dataInfo.get(region.name);
         var densityValue = popValue;
 
-        if(isNaN(densityValue)){
-            densityValue = 0;
+        //if a region has no statistic referenced to it
+        if(typeof(densityValue) == "undefined"){
+            densityValue = 0.0;
         }
         totalDensityValue += densityValue;
     }
@@ -273,12 +313,17 @@ function calculateDensities(svgLoad) {
     for(var i=0;i<svgLoad.map.regions.length;i++) {
         var region = svgLoad.map.regions.get(i);
         var popValue = dataInfo.get(region.name);
+
+        //to keep a region the same size if the data file does not have
+        //a statistic for it.
         if(popValue === 0 || typeof(popValue) === "undefined") {
-            popValue = 1.0;
+            popValue = meanDensityValue;
         }
 
         densityInfo.set(region.name,popValue/meanDensityValue);
     }
+
+    console.log(densityInfo);
     return densityInfo;
 }
 
@@ -366,14 +411,13 @@ function updateCoordinates(newGridPoints) {
             region.coordinates[j] = newCoordinate;
         }
     }
-    svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/cartogram.png'));
+    svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/cartogram.png'),newGridPoints);
     return svgLoader;
 }
 
 console.log("Running at Port 3000");
 
-
-//Event listeners
+//Event listeners from the client side javascript
 io.on('connection', function(socket){
     console.log('User Connected');
     //list of events to listen to from the client:
@@ -446,4 +490,3 @@ function buildCartogram() {
     createSVGFile();
 }
 */
-

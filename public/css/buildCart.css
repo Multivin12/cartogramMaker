@@ -21,15 +21,14 @@ html {
     float: left;
     position: relative;
     left: 50%;
-    width:40%;
+    width:60%;
 }
 #instructions{
     float: left;
     position: relative;
     left: -50%;
-    width:80%;
+    width:100%;
 }
-
 #fileUpload{
     float: left;
     position: relative;

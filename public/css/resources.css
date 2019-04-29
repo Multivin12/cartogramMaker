@@ -7,3 +7,24 @@ html {
 #bold{
     font-weight:bold;
 }
+/*To make everything aligned properly*/
+#rest{
+  float: left;
+  position: relative;
+  left: 50%;
+  width:40%;
+}
+#main{
+  float: left;
+  position: relative;
+  left: -50%;
+  width:100%;
+  top:20px;
+}
+button{
+  position:relative;
+  top:10px;
+}
+p{
+  height:20px;
+}

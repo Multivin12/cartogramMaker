@@ -27,5 +27,40 @@
 		</div>
 	</div>
 	
+	<div id="rest">
+		<div id="main">
+			<h1>Resources</h1>
+			The resource that was used to implement the cartogram algorithm can be found 
+			<a href="http://www-personal.umich.edu/~mejn/cart/doc/description.html">here.</a>
+			<br>
+			<br>
+			It provides a C code implementation of Gastner and Newman's diffusion based algorithm and was written by one 
+			of the algorithm's creators, Mark Newman. To find out more about this algorithm, their paper can be found <a href="https://www.pnas.org/content/101/20/7499.abstract">here.</a>
+			<h2>Overview of the Algorithm</h2>
+
+			The algorithm works by diving a map into sections by projecting a quadrilateral grid onto it. 
+			<br>
+			<br>
+			<img src="images/mapGrid.png" height="300" width="300">
+			<br>
+			<br>
+			It calculates a density value for each grid square and then the algorithm diffuses the grid until there is uniform density everywhere.
+			<br>
+			<br>
+			<img src="images/cartogramGrid.png" height="300" width="300">
+			<br>
+			<br>
+			This grid is then applied onto the map which intern produces the resulting cartogram.
+			<br>
+			<br>
+			<img src="images/cartogramStock.png" height="300" width="300">
+			<br>
+			<br>
+			If you would like to build one of these cartograms yourself then click the button below!
+			<br>
+			<a href="/buildCart"><button type="button" class="btn btn-primary">Build Cartogram</button></a>
+			<p> </p>
+		</div>
+	</div>
 </body>
 </html>

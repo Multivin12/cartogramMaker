@@ -12,6 +12,7 @@ const fs = require('fs');
 const {createCanvas, loadImage} = require('canvas');
 const polygonClipping = require('polygon-clipping');
 
+
 var canvasSizeX = 700;
 var canvasSizeY = 700;
 
@@ -305,7 +306,7 @@ class SVGLoader {
      * Method for drawing the map onto a png file which can then be loaded into
      * by the html. 
     */
-    drawMapToPNG(xsize,ysize,filePath) {
+    drawMapToPNG(xsize,ysize,filePath,newGridPoints) {
 
 
         //const canvas = createCanvas(parseFloat(this.map.xsize),parseFloat(this.map.ysize));
@@ -352,11 +353,49 @@ class SVGLoader {
             }
         }
 
-        
+        var scaleX = this.map.xsize / xsize;
+        var scaleY = this.map.ysize / ysize;
+
+        context.strokeStyle = 'rgb(0,0,0)';
+        context.lineWidth = 3;
+
+        /*
+        //Code for drawing the set of grid points created by the algorithm module
+        if(typeof(newGridPoints) !== "undefined") {
+            //iterate through horizontally
+            for(var i=0;i<newGridPoints.length-1;i++) {
+                if((i+1) % (xsize+1) === 0) {
+                    
+                } else {
+                    context.beginPath();
+                    context.moveTo(newGridPoints[i][0]*scaleX,newGridPoints[i][1]*scaleY);
+                    context.lineTo(newGridPoints[(i+1)][0]*scaleX,newGridPoints[(i+1)][1]*scaleY);
+                    context.stroke();      
+                }    
+            }
+
+            //now need to iterate vertically
+            console.log("----------------------");
+            for(var i=0;i<newGridPoints.length-1;i++) {
+                var actualIndex = parseInt(i/(ysize+1)) + (i%(ysize+1))*(ysize+1);
+                var nextActualIndex = parseInt((i+1)/(ysize+1)) + ((i+1)%(ysize+1))*(ysize+1);
+
+                if((i+1) % (ysize+1) === 0) {
+                    
+                } else {
+                    context.beginPath();
+                    context.moveTo(newGridPoints[actualIndex][0]*scaleX,newGridPoints[actualIndex][1]*scaleY);
+                    context.lineTo(newGridPoints[nextActualIndex ][0]*scaleX,newGridPoints[nextActualIndex][1]*scaleY);
+                    context.stroke();   
+                }  
+            }
+        }
+        */
+
         //Draw the grid
         //variables for scaling the grid number to the actual canvas coordinates
         //mainly for debugging purposes
-        /*
+        
         var scaleX = this.map.xsize / xsize;
         var scaleY = this.map.ysize / ysize;
 
@@ -378,7 +417,7 @@ class SVGLoader {
             context.lineTo(this.map.xsize,i*scaleY);
             context.stroke();
         }
-        */
+        
         
         //Save the canvas onto an external png file
         var out = fs.createWriteStream(filePath);
