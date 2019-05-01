@@ -1,2 +1,0 @@
-npm install canvas@2.0.1
-try and follow all the dependencies such as using python 2 etc. on https://github.com/Automattic/node-canvas/wiki/Installation:-Windows
