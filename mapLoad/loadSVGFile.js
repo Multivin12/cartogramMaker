@@ -73,11 +73,41 @@ class SVGLoader {
 
         //to remove the preceding g tags
         if(typeof(regions) === "undefined") {
-            var temp = this.JSONData.svg.g[0];
+            var temp = this.JSONData.svg;
             this.JSONData.svg = temp;
-            var regions = this.JSONData.svg.path;
-        }
 
+            regions = this.JSONData.svg.path;
+
+            if(typeof(regions) == "undefined") {
+
+                if(this.JSONData.svg.g.length == 1) {
+                    var temp = this.JSONData.svg.g[0];
+
+                    //is the amCharts map file
+                    if (typeof(temp["$"]) == "undefined") {
+                        this.JSONData.svg = temp;
+
+                        regions = this.JSONData.svg.path;
+                    }
+                    //for the other highcharts maps
+                    else {
+                        temp = this.JSONData.svg.g[0].path;
+
+                        this.JSONData.svg.path = temp;
+
+                        regions = this.JSONData.svg.path;
+                    }
+                }
+                //For the Highcharts map collection (France)
+                else {
+                    var temp = this.JSONData.svg.g[0].path;
+
+                    this.JSONData.svg.path = temp;
+                    regions = this.JSONData.svg.path;
+
+                }
+            }
+        }
         //This part is to find regions enclosed in <g> tags
         //and add these to the set of regions to be loaded
         var currentElement = this.JSONData.svg.g;
@@ -121,11 +151,10 @@ class SVGLoader {
             String.prototype.replaceAt=function(index, replacement) {
                 return this.substr(0, index) + replacement+ this.substr(index + replacement.length);
             };
-
             if(regionData.match(/[HVSQTAhvsqta]+/)) {
-                throw new Error("SVG Path can only contain Line Segments (L), Circular lines(C), Move to (M) or Close path (Z) Characters. Path Attribute Number= " + i +".");
+                throw new Error("SVG Path can only contain Line Segments (L), Circular lines(C), Move to (M) or Close path (Z) Characters. Path Attribute Number= " + (i+1) +".");
             }
-
+            
             //Need to convert the circular paths to line segments.
             //Firstly find the index of all C chars
             var regex = /(?<=[0-9])(\s|[Cc]|[Mm]|[Ll])(?=[0-9])/g, result, indices = [];
@@ -230,7 +259,6 @@ class SVGLoader {
         //Gather the height and width of the map file
         var height = this.JSONData.svg["$"].height;
         var width = this.JSONData.svg["$"].width;
-
 
         this.map = new Map(parseFloat(height),parseFloat(width));
 
