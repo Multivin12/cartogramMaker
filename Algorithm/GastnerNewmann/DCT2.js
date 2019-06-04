@@ -4,10 +4,41 @@ var FFTUtils = lib.FFTUtils
 
 class DCT2{
 
-    //Performs the 2D dct taking a 2D array as input
-    //Code taken from https://stackoverflow.com/questions/13491895/matlab-create-my-own-dct2
-    static performDCT2(_2DArray) {
-        /*
+    static newDct2(_2DArray) {
+
+        var nRows = DCT2.getNoOfRows(_2DArray);
+        var nCols = DCT2.getNoOfColumns(_2DArray);
+
+        var data = new Array(nRows*nCols);
+        for(var i=0;i<nRows;i++){
+            for(var j=0;j<nCols;j++){
+                data[i*nCols+j]=_2DArray[i][j];
+            }
+        }
+
+        var ftData = FFTUtils.fft2DArray(data, nCols,nRows);
+
+        var inc = 0;
+        var output = [];
+
+        for(var x = 0; x < nCols; x++) {
+            output[x] = [ ];
+            for(var y = 0; y < nRows; y++) {
+                if(y >= (nRows /2 + 1)) {
+                    output[x][y] = 0;
+                } else {
+                    output[x][y] = ftData[inc];
+                    inc++;
+                }
+            }
+            inc += nRows/2+1;
+        }
+
+        return output;
+    }
+
+    static oldDct2(_2DArray) {
+
         var M = DCT2.getNoOfRows(_2DArray);
         var N = DCT2.getNoOfColumns(_2DArray);
 
@@ -45,42 +76,12 @@ class DCT2{
                 }
                 output[p][q] = final;
             }
-        }*/
-
-        var nRows = DCT2.getNoOfRows(_2DArray);
-        var nCols = DCT2.getNoOfColumns(_2DArray);
-
-        var data = new Array(nRows*nCols);
-        for(var i=0;i<nRows;i++){
-            for(var j=0;j<nCols;j++){
-                data[i*nCols+j]=_2DArray[i][j];
-            }
         }
-
-        var ftData = FFTUtils.fft2DArray(data, nCols,nRows);
-
-        var inc = 0;
-        var output = [];
-
-        for(var x = 0; x < nCols; x++) {
-            output[x] = [ ];
-            for(var y = 0; y < nRows; y++) {
-                if(y >= (nRows /2 + 1)) {
-                    output[x][y] = 0;
-                } else {
-                    output[x][y] = ftData[inc];
-                    inc++;
-                }
-            }
-            inc += nRows/2+1;
-        } 
 
         return output;
     }
 
-    //Performs the 2D idct taking a 2D array as input
-    static performiDCT2(_2DArray) {
-        /*
+    static oldiDct2(_2DArray) {
         var M = DCT2.getNoOfRows(_2DArray);
         var N = DCT2.getNoOfColumns(_2DArray);
         var output = DCT2.initialize2DArray(M,N);
@@ -117,8 +118,11 @@ class DCT2{
                 output[m][n] = final;
             }
         }
-        */
 
+        return output;
+    }
+
+    static newiDCT2(_2DArray) {
         var nRows = DCT2.getNoOfRows(_2DArray);
         var nCols = DCT2.getNoOfColumns(_2DArray);
 
@@ -163,6 +167,23 @@ class DCT2{
                 output[i][j] = iftData[j+i*nCols];
             }
         }
+
+        return output;
+    }
+
+    //Performs the 2D dct taking a 2D array as input
+    //Code taken from https://stackoverflow.com/questions/13491895/matlab-create-my-own-dct2
+    static performDCT2(_2DArray) {
+        var output = DCT2.oldDct2(_2DArray);
+        //var output = DCT2.newDct2(_2DArray);
+        
+        return output;
+    }
+
+    //Performs the 2D idct taking a 2D array as input
+    static performiDCT2(_2DArray) {
+        var output = DCT2.oldiDct2(_2DArray);
+        //var output = DCT2.newiDCT2(_2DArray);
 
         return output;        
     }
