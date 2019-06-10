@@ -3,7 +3,7 @@
  * and storing the regions and coordinates in appropriate objects.
  */
 const ArrayList = require('arraylist');
-const Queue = require('queue');
+const Queue = require('queue-fifo');
 const DCT2 = require('../Algorithm/GastnerNewmann/DCT2.js');
 const path = require('path');
 //This module is for converting the svg file to a JSON format.
@@ -78,6 +78,7 @@ class SVGLoader {
 
             regions = this.JSONData.svg.path;
 
+            
             if(typeof(regions) == "undefined") {
 
                 if(this.JSONData.svg.g.length == 1) {
@@ -111,39 +112,54 @@ class SVGLoader {
         //This part is to find regions enclosed in <g> tags
         //and add these to the set of regions to be loaded
         var currentElement = this.JSONData.svg.g;
+
         //test if the document actually has any g tags
         if(typeof(currentElement) !== "undefined") {
+
             var listToEvaluate = new Queue();
 
             for(var i=0;i<currentElement.length;i++) {
-                listToEvaluate.push(currentElement[i]);
+                listToEvaluate.enqueue(currentElement[i]);
             }
+
+            var regionsToAdd = new ArrayList();
+
+            //to get any regions not in g tags.
+            for(var i=0;i<this.JSONData.svg.path.length;i++) {
+                regionsToAdd.push(JSON.stringify(this.JSONData.svg.path[i]));
+            }
+            
             //essentially an implemetation of the breadth first search
             //as DOM is a tree data structure.
-            while(listToEvaluate.length !== 0) {
-                currentElement = listToEvaluate.pop();
+            while(listToEvaluate.size() !== 0) {
+                currentElement = listToEvaluate.dequeue();
 
-                //if this happens it's not a region element
-                if(typeof(currentElement.path) === "undefined") {
+                //Test if it has a g element
+                if(typeof(currentElement.g) !== "undefined") {
                     var childElements = currentElement.g;
 
                     //Means there are no regions present in the g tag
                     if(typeof(childElements) === "undefined") {
                     } else {
                         for(var i=0;i<childElements.length;i++) {
-                            listToEvaluate.push(childElements[i]);
+                            listToEvaluate.enqueue(childElements[i]);
                         }
                     }
-                } else {
-                    //else add it to the collection of regions
-                    var jsonToAdd = currentElement.path[0];
-                    var jsonToAddTo = this.JSONData.svg.path;
-                    
-                    jsonToAddTo.push(jsonToAdd);
+                }
+
+                //else add it to the collection of regions
+                var regions = currentElement.path;
+                for(var i=0;i<regions.length;i++) {
+                    regionsToAdd.push(JSON.stringify(regions[i]));
                 }
             }
-        }
 
+            //then add the gathered regions to the json
+            for(var i=0;i<regionsToAdd.length;i++) {
+                this.JSONData.svg.path.push(JSON.parse(regionsToAdd[i]));
+            }
+        }
+        
         //Now need to format the path attribute string
         for(var i=0;i<regions.length;i++) {
             var regionData = regions[i]['$'].d;
@@ -189,6 +205,10 @@ class SVGLoader {
             //must include this at the bottom as Strings are immutable
             this.JSONData.svg.path[i]['$'].d = regionData;
         }
+        
+        var numRegions = regions.length;
+        
+        /*
         //next is to combine regions together as the path attributes are seperate if a Region spans accross multiple islands
         //for the wikipedia SVG File
         //This is done by checking if a region has a name then adding following paths to that region if they don't have a name.
@@ -196,12 +216,11 @@ class SVGLoader {
         var regions = this.JSONData.svg.path;
         var currentRegionName = null;
 
-        var numRegions = regions.length;
         for(var j=0;j<regions.length;j++) {
 
             var flag = false;
             var flag2 = false;
-
+            
             try{
                 currentRegionName = regions[j].name[0]._;
             } catch(err) {
@@ -231,7 +250,7 @@ class SVGLoader {
                 currentRegionName = this.JSONData.svg.path[j].name;
             }
         }
-
+        */
 
         //next is to test if the name of a region is stored in an attribute (like it is for AM Charts)
         var regions = this.JSONData.svg.path;
@@ -353,7 +372,7 @@ class SVGLoader {
         //Draw the SVG Data into the rectangle
         context.strokeStyle = 'rgb(0,0,0)';
         context.lineWidth = 1;
-
+        
 
         //Draw the map
         for(var i=0;i<this.map.regions.length;i++) {
@@ -361,7 +380,7 @@ class SVGLoader {
             context.fillStyle = 'orange';
             context.beginPath();
             for(var j=0;j<this.map.regions[i].coordinates.length;j++) {
-
+                
                 var coordinate = this.map.regions[i].coordinates[j];
                 
                 if(coordinate.drawChar === 'M') {
@@ -380,14 +399,14 @@ class SVGLoader {
                 }
             }
         }
-
+        /*
         var scaleX = this.map.xsize / xsize;
         var scaleY = this.map.ysize / ysize;
 
         context.strokeStyle = 'rgb(0,0,0)';
         context.lineWidth = 3;
 
-        /*
+        
         //Code for drawing the set of grid points created by the algorithm module
         if(typeof(newGridPoints) !== "undefined") {
             //iterate through horizontally

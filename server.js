@@ -31,8 +31,8 @@ var svgLoader = new SVGLoader();
 //Values for the matrix of densities.
 //corresponds to the number of density values NOT the grid size.
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var xsize = 32;
-var ysize = 32;
+var xsize = 64;
+var ysize = 64;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //homepage
@@ -100,16 +100,20 @@ app.post('/fileUpload',(req,res) =>{
             try{
                 svgLoader.readSVGFile("/../uploads/mapFile.svg");
                 svgLoader.collectMapData();
-
                 //check CSV file
                 var dataBuffer = fs.readFileSync(path.join(__dirname + "/uploads/dataFile.csv"));
                 var data = dataBuffer.toString();
 
                 if(checkCSVFile(data)) {
-                    //means the CSV file is okay
-                    //xsize and ysize passed for drawing the grid just tp get a visualization
-                    svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
-                    res.render(__dirname + '/views/buildCart2.html');
+                    if( checkSVGFile(svgLoader.JSONData)) {
+                        //means the CSV file is okay
+                        //xsize and ysize passed for drawing the grid just tp get a visualization
+                        svgLoader.drawMapToPNG(xsize,ysize,path.join(__dirname + '/public/images/map.png'));
+                        res.render(__dirname + '/views/buildCart2.html');
+                    } else {
+                        io.emit('Error',err.message);
+                        res.render(__dirname + '/views/buildCart.html');
+                    }
                 } else {
                     io.emit('Error',err.message);
                     res.render(__dirname + '/views/buildCart.html');
@@ -178,14 +182,99 @@ function checkCSVFile(data) {
             throw new Error("Must only have one comma for each line in datafile");
         }
 
+        var number = +elements[1];
 
-        if(!(/^\d+$/.test(elements[1]))) {
+        if(isNaN(number)) {
             throw new Error("Statistical value can only contain numbers.")
         }
     }
     
     return true;
 }
+
+/**
+ * Method for checking whether the SVG file is valid.
+ * @param {String} SVGData 
+ */
+function checkSVGFile(SVGData) {
+
+    var regions = SVGData.svg.path;
+
+    var listOfNames = new ArrayList();
+
+    //Gather the names of all regions in the SVG file
+    for(var i=0;i<regions.length;i++) {
+        listOfNames.push(regions[i].name);
+    }
+
+    var indexOfMissingNames = new ArrayList();
+    for(var i=0;i<regions.length;i++) {
+        if(typeof(listOfNames[i]) === "undefined") {
+            indexOfMissingNames.push((i+1));
+        }
+    }
+
+    if(indexOfMissingNames.length !== 0) {
+
+        var errorString = "";
+
+        for(var i=0;i<indexOfMissingNames.length;i++) {
+
+            if(i === (indexOfMissingNames.length-1)) {
+                errorString += indexOfMissingNames[i] + ".";
+            } else {
+                errorString += indexOfMissingNames[i] + ",";
+            }
+        }
+
+        throw new Error("Regions with missing names present. Region Location: " + errorString);
+    }
+
+    //Need to check whether there is a statistic for every region in the SVG file.
+    //gather CSV file data.
+    var dataBuffer = fs.readFileSync(path.join(__dirname + "/uploads/dataFile.csv"));
+    var data = dataBuffer.toString();
+
+    var lines = data.split("\r\n");
+
+    var CSVNames = new Set();
+
+    //put the list of names from the CSV file
+    for(var i=0;i<lines.length;i++) {
+        var line = lines[i].split(",");
+
+        CSVNames.add(line[0]);
+    }
+
+    //then gather the list of SVG names and check if any of them don't have a data value.
+    var regions = svgLoader.JSONData.svg.path;
+    var missingNames = new Set();
+
+    for(var i=0;i<regions.length;i++) {
+        var regionName = regions[i].name[0];
+
+        if(!(CSVNames.has(regionName))) {
+            missingNames.add(regionName);
+        }
+    }
+
+    var setArray = Array.from(missingNames);
+
+    if(setArray.length !== 0) {
+        var errorString = "";
+        for(var i=0;i<setArray.length;i++) {
+            
+            if(i === (setArray.length-1)) {
+                errorString += setArray[i];
+            } else {
+                errorString += setArray[i] + ",";
+            }
+        }
+        throw new Error("Regions " + errorString + " have no data present.")
+    }
+    return true;
+}
+
 function createSVGFile(svgLoad) {
 
     //assign everything to its correct object as javascript just converts it
@@ -367,7 +456,10 @@ function createDensityGrid(densityHashMap) {
                 densityGrid[i][j] = densityTotal;
             }
 
-            console.log(j+i*grid.gridSquares[i].length);
+            if((j+i*grid.gridSquares[i].length) % 100 == 0) {
+                console.log(j+i*grid.gridSquares[i].length);
+            }
+            
             //densityGrid [i][j] += (1-percentTotal)*densityHashMap.get("Sea");
         }
     }
